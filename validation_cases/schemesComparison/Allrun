@@ -1,0 +1,31 @@
+#!/bin/sh
+
+source ./functions
+
+#clean the case
+clean
+solver=$(getSolver)
+cp -r 0.orig 0
+
+echo "Generating mesh"
+foamJob -w -a blockMesh >& /dev/null
+
+cat system/schemesToTest | while read scheme
+do
+    echo "Running the simulation with $scheme scheme"
+    sed "s/DIVSCHEME/$scheme/g" system/fvSchemes.template > system/fvSchemes
+
+    # Create a sanitised name for the scheme - remove 'special' characters
+    schemeTag=$(sed -e 's# #_#g#' -e 's#(##g' -e 's#)##g' -e 's#\.##g' \
+                <<< "$scheme")
+
+    ( { time foamJob -w -a $solver; } > tmp 2>&1 ) \
+    && echo "runtime: $(grep "real" tmp | awk '{ print $2 }')"  || exit 1
+    rm tmp
+
+    # Save the line plot
+    mv postProcessing/sample1/100/line1_T.xy outputs/line1_T_${schemeTag}.xy
+done
+
+echo "Plotting the results"
+./plot

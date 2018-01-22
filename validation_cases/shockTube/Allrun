@@ -1,0 +1,24 @@
+#!/bin/bash
+
+source ./functions
+
+#clean the case
+clean
+solver=$(getSolver)
+cp -r 0.orig 0
+
+echo "Generating mesh"
+foamJob -w -a blockMesh >& /dev/null
+
+echo "Setting initial conditions"
+foamJob -w -a setFields >&/dev/null
+
+echo "Renumbering Matrices"
+foamJob -w -a renumberMesh -overwrite >&/dev/null
+
+echo "Running $solver"
+foamJob -w -a $solver >&/dev/null
+
+echo "Plotting validation graphs"
+python plots/exactRiemann.py
+#------------------------------------------------------------------------------

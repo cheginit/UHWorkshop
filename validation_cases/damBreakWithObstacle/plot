@@ -1,0 +1,32 @@
+#!/bin/bash
+#Experimental data from http://www.math.rug.nl/~veldman/comflow/dambreak.html
+
+for sensor in "p1" "p7" "H2" "H4"; do
+case $sensor in
+    p1) col="2"
+        tt="Pressure (Pa)"
+        ff="postProcessing/probes/0/p";;
+    p7) col="3"
+        tt="Pressure (Pa)"
+        ff="postProcessing/probes/0/p";;
+    H2) col="5"
+        tt="Water level (m)"
+        ff="postProcessing/waterLevel/0/height.dat";;
+    H4) col="3"
+        tt="Water level (m)"
+        ff="postProcessing/waterLevel/0/height.dat";;
+esac
+
+gnuplot<<EOF
+    set terminal pdf enhanced color
+    set output "plots/$sensor.pdf"
+    set title "$tt fluctuations at $sensor sensor"
+    set xlabel "Time (s)"
+    set ylabel "$tt"
+    set xrange [0:4.8]
+    set key right top
+
+    plot "$ff" u 1:$col t "Numerical" w l , \
+         "plots/${sensor}Exp" u 1:2 w l ls 21 t "Experimental"
+EOF
+done

@@ -1,0 +1,19 @@
+#!/bin/sh
+IFS=$'\n' read -d '' -r -a schemes <  system/schemesToTest
+
+for i in `seq 1 $(expr "${#schemes[@]}" - 1)`;do
+    tag1=$(sed -e 's# #_#g#' -e 's#(##g' -e 's#)##g' -e 's#\.##g' \
+           <<< "${schemes[$i]}")
+    tag2=$(sed -e 's# #_#g#' -e 's#(##g' -e 's#)##g' -e 's#\.##g' \
+           <<< "${schemes[`expr $i - 1`]}")
+
+    gnuplot <<- EOF
+        set term pdf enhanced
+        set output "plots/comparison_$i.pdf"
+        set xrange [0:1.4]
+        set yrange [-0.1:1.1]
+        plot "outputs/line1_T_$tag1.xy" w l t "${schemes[$i]}", \
+             "outputs/line1_T_$tag2.xy" w l t "${schemes[`expr $i - 1`]}", \
+             'outputs/excat_sol.xy' w l t "Exact"
+EOF
+done

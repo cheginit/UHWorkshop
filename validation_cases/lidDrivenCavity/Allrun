@@ -1,0 +1,28 @@
+#!/bin/bash
+
+source ./functions
+
+#clean the case
+clean
+solver=$(getSolver)
+cp -r 0.orig 0
+
+export re="100"
+echo "Setting Re to $re"
+#foamDictionary -entry Re -set $re -disableFunctionEntries \
+#               constant/transportProperties >& /dev/null
+ln=$(grep -n -m1 "Re" constant/transportProperties \
+     | awk -F ":" '{ print $1 }')
+sed -i ''"$ln"' c \Re    '"$re"';' constant/transportProperties
+
+echo "Generating mesh"
+foamJob -w -a blockMesh >& /dev/null
+
+echo "Renumbering Matrices"
+foamJob -w -a renumberMesh -overwrite >&/dev/null
+
+echo "Running $solver"
+foamJob -w -a $solver >&/dev/null
+
+echo "Plotting validation graphs"
+./plot

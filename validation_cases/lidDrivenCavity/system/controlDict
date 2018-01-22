@@ -1,0 +1,72 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     icoFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         2;
+
+deltaT          0.001;
+
+writeControl    timeStep;
+
+writeInterval   20;
+
+purgeWrite      0;
+
+writeFormat     binary;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    #includeFunc residuals
+    #includeFunc singleGraph
+    #includeFunc streamlines
+
+    /*vorticity
+    {
+        type        vorticity;
+        libs        ("libfieldFunctionObjects.so");
+        writeControl    writeTime;
+    }
+    
+    vorticityMinMax
+    {
+        type        fieldMinMax;
+        libs        ("libfieldFunctionObjects.so");
+        writeToFile yes;
+        log         yes;
+        location    yes;
+        mode        magnitude;
+        fields      (vorticity);
+    }*/
+}
+// ************************************************************************* //

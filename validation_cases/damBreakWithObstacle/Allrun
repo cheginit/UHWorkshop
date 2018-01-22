@@ -1,0 +1,34 @@
+#!/bin/bash
+
+source ./functions
+
+#clean the case
+clean
+solver=$(getSolver)
+cp -r 0.orig 0
+
+echo "Generating mesh"
+foamJob -w -a blockMesh >& /dev/null
+foamJob -w -a topoSet >&/dev/null
+foamJob -w -a subsetMesh -overwrite c0 -patch walls >&/dev/null
+
+echo "Setting initial conditions"
+foamJob -w -a setFields >&/dev/null
+
+echo "Decomposition and optimizations"
+foamJob -w -a decomposePar >&/dev/null
+
+echo "Renumbering Matrices"
+foamJob -w -a -p renumberMesh -overwrite >&/dev/null
+
+echo "Running $solver in parallel"
+foamJob -w -a -p $solver >&/dev/null
+
+echo "Reconstructing case"
+foamJob -w -a reconstructPar >&/dev/null
+
+echo "Plotting validation graphs"
+./plot >> log 2>&1
+
+echo "Rendering the results in 3D"
+./render >> log 2>&1

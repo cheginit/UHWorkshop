@@ -1,0 +1,11 @@
+getSolver()
+{
+    sed -ne 's/^ *application\s*\([a-zA-Z]*\)\s*;.*$/\1/p' system/controlDict
+}
+
+clean()
+{
+    echo "Cleaning up the case"
+    foamListTimes -rm
+    rm -rf post* proc* log* 0 dynamicCode constant/polyMesh >&/dev/null
+}
