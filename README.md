@@ -1,5 +1,5 @@
 # UHOFWorkshop
-The required files for the cases that are discussed in the workshop are included so everyone can follow up.
+The required files for the cases that are discussed in the workshop are included so everyone can follow up and the slides can be found [here](https://docs.google.com/presentation/d/1UjtjlS25p67926MGkfcqqwF_TzZnAMVaATlGtyDUfQE/edit?usp=sharing).
 
 1. Cases are:
 1D: **Sod problem** validated with analytical solution
