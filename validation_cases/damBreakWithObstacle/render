@@ -11,12 +11,10 @@ st=($(seq 0 $div $lt))
 touch ${proj}.foam
 
 if [ "$(hostname)" == "cfd-lab" ]; then
-  export BK=$PATH
-  export PATH=/home/taher/anaconda/anaconda2/bin:$PATH
-else
-  source activate pvpy
-  export PYTHONPATH=$HOME/.conda/envs/pvpy/lib/python2.7/site-packages/paraview/vtk:$PYTHONPATH
+  PATH=/home/taher/anaconda/anaconda2/bin:$PATH
 fi
+
+source activate pypv
 
 echo "Plotting the data using Paraview"
 
@@ -27,13 +25,7 @@ done
 
 wait
 
-if [ "$(hostname)" == "cfd-lab" ]; then
-  unset PATH
-  export PATH=$BK
-else
-  source deactivate
-  unset PYTHONPATH
-fi
+source deactivate
 
 fn=$(foamListTimes -withZero | wc -l)
 fr=$(expr $fn / $lt)

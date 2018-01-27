@@ -10,7 +10,7 @@ cp -r 0.orig 0
 echo "Generating mesh"
 foamJob -w -a blockMesh >& /dev/null
 foamJob -w -a topoSet >&/dev/null
-foamJob -w -a subsetMesh -overwrite c0 -patch walls >&/dev/null
+foamJob -w -a subsetMesh -overwrite obstacle -patch walls >&/dev/null
 
 echo "Setting initial conditions"
 foamJob -w -a setFields >&/dev/null

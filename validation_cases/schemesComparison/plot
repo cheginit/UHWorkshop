@@ -8,8 +8,8 @@ for i in `seq 1 $(expr "${#schemes[@]}" - 1)`;do
            <<< "${schemes[`expr $i - 1`]}")
 
     gnuplot <<- EOF
-        set term pdf enhanced
-        set output "plots/comparison_$i.pdf"
+        set term pngcairo enhanced
+        set output "plots/comparison_$i.png"
         set xrange [0:1.4]
         set yrange [-0.1:1.1]
         plot "outputs/line1_T_$tag1.xy" w l t "${schemes[$i]}", \

@@ -8,37 +8,31 @@
 FoamFile
 {
     version     2.0;
-    format      ascii;
-    class       dictionary;
-    object      topoSetDict;
+    format      binary;
+    class       volVectorField;
+    location    "0";
+    object      U;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-actions
-(
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    atmosphere
     {
-        name    obstacle;
-        type    cellSet;
-        action  clear;
+        type            pressureInletOutletVelocity;
+        value           uniform (0 0 0);
     }
-    
+    walls
     {
-        name    obstacle;
-        type    cellSet;
-        action  invert;
+        type            uniformFixedValue;
+        uniformValue    constant (0 0 0);
+        value           uniform (0 0 0);
     }
-    
-    {
-        name    obstacle;
-        type    cellSet;
-        action  delete;
-        source  boxToCell;
-        sourceInfo
-        {
-	        box (0.67 0 0.3) (0.83 0.16 0.6);
-        }
-    }
-);
+}
+
 
 // ************************************************************************* //

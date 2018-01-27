@@ -47,15 +47,13 @@ solvers
     {
         solver          PBiCGStab;
         preconditioner  DIC;
-        tolerance       1e-6;
+        tolerance       1e-8;
         relTol          1e-2;
     }
 
     p_rghFinal
     {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-6;
+        $p_rgh;
         relTol          0;
     }
 
