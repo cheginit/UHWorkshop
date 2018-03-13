@@ -17,13 +17,23 @@ Cases are:
 # Paraview python instllation
 
 wget "https://repo.continuum.io/archive/Anaconda2-5.1.0-Linux-x86_64.sh"
+
 bash ~/Downloads/Anaconda2-5.1.0-Linux-x86_64.sh
+
 echo "alias ana2="export PATH=$HOME/anaconda/anaconda2/bin:$PATH"" >> ~/.bashrc
+
 source ~/.bashrc
+
 ana2
+
 conda create -n pypv -c conda-forge python=2
+
 source activate pypv
+
 conda install -c conda-forge paraview
+
 conda update -c conda-forge --all
+
 python -c "from paraview.simple import *"
+
 source deactivate
