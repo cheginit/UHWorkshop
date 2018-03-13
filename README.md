@@ -15,7 +15,7 @@ Cases are:
 ![Experimental Setup]( https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop1/damBreakWithObstacle/plots/dbconfig.png )
 
 # Paraview python instllation
-'''bash
+```bash
 wget "https://repo.continuum.io/archive/Anaconda2-5.1.0-Linux-x86_64.sh"
 
 bash Anaconda2-5.1.0-Linux-x86_64.sh
@@ -37,4 +37,4 @@ conda update -c conda-forge --all
 python -c "from paraview.simple import *"
 
 source deactivate
-'''
+```
