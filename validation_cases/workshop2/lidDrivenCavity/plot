@@ -1,0 +1,43 @@
+#!/bin/sh
+re=$(foamDictionary -entry Re -value -disableFunctionEntries constant/parameters | tail -1)
+case $re in
+  100)   col="2";;
+  1000)  col="3";;
+  5000)  col="4";;
+  10000) col="5";;
+  *)     echo "Data is not available for Re=$re" \
+      && echo "Accceptable values are: 100, 1000, 5000, 10000" \
+      && exit 1;;
+esac
+
+lt=$(foamListTimes -latestTime | tail -1)
+cp postProcessing/singleGraph/$lt/horizontal_U.xy plots/
+cp postProcessing/singleGraph/$lt/vertical_U.xy plots/
+
+gnuplot<<EOF
+    set terminal pdf enhanced color
+    set output "plots/uvelocity.pdf"
+    set ylabel "y (m)"
+    set xlabel "U_x (m/s)"
+    set title  "Velocity fluctuations at the middle in x-dir. with Re=$re"
+    set grid
+    set key right bottom
+
+    plot "plots/vertical_U_old.xy" u 2:1 t "Old" w l, \
+         "plots/vertical_U.xy" u 2:1 t "New" w l, \
+         "plots/yu" u $col:(\$1*0.1) w p ls 22 t "Ghia"
+EOF
+
+gnuplot<<EOF
+    set terminal pdf enhanced color
+    set output "plots/vvelocity.pdf"
+    set xlabel "x (m)"
+    set ylabel "U_y (m/s)"
+    set title  "Velocity fluctuations at the middle in y-dir. with Re=$re"
+    set grid
+    set key top right
+
+    plot "plots/horizontal_U_old.xy" u 1:3 t "Old" w l, \
+         "plots/horizontal_U.xy" u 1:3 t "New" w l, \
+         "plots/xv" u (\$1*0.1):$col w p ls 22 t "Ghia"
+EOF

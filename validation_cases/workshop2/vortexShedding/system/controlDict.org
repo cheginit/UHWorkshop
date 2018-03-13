@@ -1,0 +1,255 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     icoFoam;
+
+//startFrom       startTime;
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+//stopAt	  writeNow;
+
+endTime         350;
+//endTime         500;
+
+//deltaT          0.005;
+//deltaT          0.01;
+//deltaT          0.02;
+deltaT          0.05;
+
+writeControl    runTime;
+/*
+adjustableRunTime
+clockTime
+cpuTime
+runTime
+timeStep
+*/
+
+writeInterval   1;
+
+/*
+secondaryWriteControl    cpuTime;
+secondaryWriteInterval   1000; 
+secondaryPurgeWrite      1; 
+*/
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+// ************************************************************************* //
+
+functions
+{
+
+///////////////////////////////////////////////////////////////////////////
+    inMassFlow
+    {
+        type            faceSource;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        enabled         true;
+
+//        outputControl     outputTime;
+	outputControl   timeStep;
+	outputInterval  1;
+
+        log             true;
+
+        valueOutput     false;
+
+        source          patch;
+        sourceName      in;
+
+	operation       sum;
+        fields
+        (
+            phi
+        );
+    }
+///////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////
+    outMassFlow
+    {
+        type            faceSource;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        enabled         true;
+
+	//outputControl     outputTime;
+
+	outputControl   timeStep;
+	outputInterval  1;
+
+        log             yes;
+
+        valueOutput     false;
+
+	//valueOutput     true;
+	//surfaceFormat   raw;
+
+        source          patch;
+        sourceName      out;
+
+	operation       sum;
+        fields
+        (
+            phi
+        );
+    }
+///////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////
+
+    fieldAverage
+    {
+        type            fieldAverage;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        enabled         true;
+        outputControl   outputTime;
+
+	//outputControl   timeStep;
+	//outputInterval  100;
+
+	//cleanRestart true;
+
+	//timeStart       20;
+	//timeEnd         200;
+
+        fields
+        (
+            U
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+
+            p
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+        );
+    }
+
+///////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////
+
+    forces_object
+    {
+	type forces;
+	functionObjectLibs ("libforces.so");
+
+	//outputControl outputTime;
+	outputControl   timeStep;
+	outputInterval  1;
+
+	//// Patches to sample
+	//patches ("body1" "body2" "body3");
+	patches ("cylinder");
+
+	//// Name of fields
+	pName p;
+	Uname U;
+
+	//// Density
+	rhoName rhoInf;
+	rhoInf 1.;
+
+	//// Centre of rotation
+	CofR (0 0 0);
+    }
+
+///////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////
+
+    forceCoeffs_object
+    {
+	// rhoInf - reference density
+	// CofR - Centre of rotation
+	// dragDir - Direction of drag coefficient
+	// liftDir - Direction of lift coefficient
+	// pitchAxis - Pitching moment axis
+	// magUinf - free stream velocity magnitude
+	// lRef - reference length
+	// Aref - reference area
+	type forceCoeffs;
+	functionObjectLibs ("libforces.so");
+	//patches ("body1" "body2" "body3");
+	patches (cylinder);
+
+	pName p;
+	Uname U;
+	rhoName rhoInf;
+	rhoInf 1.0;
+
+	//// Dump to file
+	log true;
+
+	CofR (0.0 0 0);
+	liftDir (0 1 0);
+	dragDir (1 0 0);
+	pitchAxis (0 0 1);
+	magUInf 1.0;
+	lRef 1.0;         // reference lenght for moments!!!
+	Aref 2.0;         // reference area 1 for 2d
+
+        outputControl   timeStep;
+        outputInterval  1;
+    }
+
+///////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////
+
+    minmaxdomain
+    {
+	type fieldMinMax;
+	//type banana;
+
+	functionObjectLibs ("libfieldFunctionObjects.so");
+
+	enabled true;
+
+	mode component;
+
+	outputControl timeStep;
+	outputInterval 1;
+
+	log true;
+
+	fields (p U);
+    }
+
+///////////////////////////////////////////////////////////////////////////
+
+};
