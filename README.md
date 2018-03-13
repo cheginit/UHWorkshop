@@ -18,7 +18,7 @@ Cases are:
 
 wget "https://repo.continuum.io/archive/Anaconda2-5.1.0-Linux-x86_64.sh"
 
-bash ~/Downloads/Anaconda2-5.1.0-Linux-x86_64.sh
+bash Anaconda2-5.1.0-Linux-x86_64.sh
 
 echo "alias ana2="export PATH=$HOME/anaconda/anaconda2/bin:$PATH"" >> ~/.bashrc
 
