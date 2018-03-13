@@ -1,5 +1,5 @@
 # UHOFWorkshop
-The required files for the cases that are discussed in the workshop are included so everyone can follow up and the slides can be found on [google slides](https://docs.google.com/presentation/d/1UjtjlS25p67926MGkfcqqwF_TzZnAMVaATlGtyDUfQE/edit?usp=sharing) or this [PDF](https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop1/UHOF.pdf) file.
+The required files for the cases that are discussed in the workshop are included so everyone can follow up and the slides are  [UHOF I](https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop1/UHOF.pdf) and [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop2/UHOF.pdf).
 
 Cases are:
 
