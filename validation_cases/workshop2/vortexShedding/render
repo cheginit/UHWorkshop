@@ -1,0 +1,19 @@
+#!/bin/bash
+
+et="$(foamDictionary -entry endTime -value system/controlDict | tail -1)"
+wi="$(foamDictionary -entry writeInterval -value system/controlDict | tail -1)"
+
+[ ! -d plots/frames ] && mkdir -p plots/frames
+
+echo "Plotting flow in pipes using Paraview"
+rm -f plots/frames/*
+
+[ "$(hostname)" == "cfd-lab" -o "$(hostname)" == "cfd-uh" ] \
+&& PATH=$HOME/anaconda/anaconda2/bin:$PATH
+
+source activate pypv
+[ ! -f foam.foam ] && touch foam.foam
+
+echo "Creating videos from simulation"
+{ python plots/video.py $et $wi;} 2>/dev/null
+source deactivate
