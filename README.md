@@ -14,6 +14,10 @@ Cases are:
 3. 3D: **Dam break with obstacle** validated with results from the literature:
 ![Experimental Setup]( https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop1/damBreakWithObstacle/plots/dbconfig.png )
 
+# Turbulence Calculator:
+
+For calculating initial values of turbulence paramaters, [CFD-online Turbulence Calculator](https://www.cfd-online.com/Tools/turbulence.php) can be used.
+
 # Paraview python instllation
 ```bash
 wget "https://repo.continuum.io/archive/Anaconda2-5.1.0-Linux-x86_64.sh"
