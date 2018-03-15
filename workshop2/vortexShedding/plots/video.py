@@ -94,9 +94,9 @@ renderView1.CameraFocalPoint = [8.08, 0, 0.0]
 renderView1.CameraParallelScale = 4.41
 
 # save animation
-SaveAnimation('plots/frames/vortex.png', renderView1, ImageResolution=[1600, 802],
-    FrameWindow=[0, nf])
-    
+SaveAnimation('plots/frames/vortex.png', renderView1, ImageResolution=[1600, 802], FrameWindow=[0, nf])
+  
+# save snapshot  
 animationScene1.AnimationTime = 250
 renderView1.ViewTime = 250
 SaveScreenshot('plots/frames/250.png', renderView1, ImageResolution=[1600, 802], TransparentBackground=1)
