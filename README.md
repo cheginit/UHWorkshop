@@ -4,16 +4,16 @@ The required files for the cases that are discussed in the workshop are included
 Cases are:
 
 1. 1D: **Sod problem** validated with analytical solution
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/shockTube/plots/initialCondition.png" width="450">
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/shockTube/plots/initialCondition.png" width="500">
 
 2. 2D: **Lid driven cavity** validated with results from the literature:
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/lidDrivenCavity/plots/cavity.png" width="450">
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/lidDrivenCavity/plots/cavity.png" width="500">
 
 3. 3D: **Dam break with obstacle** validated with results from the literature:
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/damBreakWithObstacle/plots/dbconfig.png" width="450">
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/damBreakWithObstacle/plots/dbconfig.png" width="500">
 
 4. 2D: **Vortex Shedding** for more advanced meshing and working with paraview python module:
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop2/vortexShedding/plots/frames/250.png" width="450">
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop2/vortexShedding/plots/frames/250.png" width="500">
 
 # Turbulence Calculator:
 
