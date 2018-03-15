@@ -1,0 +1,106 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "${FOAM_CASE}/constant/parameters"
+
+convertToMeters 1;
+
+vertices
+(
+    ($r1 0 $zb)
+    ($r2 0 $zb)
+    ($outr 0 $zb)
+    ($outr $r2m $zb)
+    ($r2m $r2m $zb)
+    ($r1m $r1m $zb)
+    ($outr $outr $zb)
+    ($r2m $outr $zb)
+    (0 $outr $zb)
+    (0 $r2 $zb)
+    (0 $r1 $zb)
+    
+    ($r1 0 $zf)
+    ($r2 0 $zf)
+    ($outr 0 $zf)
+    ($outr $r2m $zf)
+    ($r2m $r2m $zf)
+    ($r1m $r1m $zf)
+    ($outr $outr $zf)
+    ($r2m $outr $zf)
+    (0 $outr $zf)
+    (0 $r2 $zf)
+    (0 $r1 $zf)
+);
+
+blocks
+(
+    hex (5 4 9 10 16 15 20 21) ($cyl $cyl 1) simpleGrading (2 1 1)
+    hex (0 1 4 5 11 12 15 16) ($cyl $cyl 1) simpleGrading (2 1 1)
+    hex (1 2 3 4 12 13 14 15) ($rec $cyl 1) simpleGrading (2 1 1)
+    hex (4 3 6 7 15 14 17 18) ($rec $rec 1) simpleGrading (2 4 1)
+    hex (9 4 7 8 20 15 18 19) ($cyl $rec 1) simpleGrading (1 4 1)
+);
+
+edges
+(
+    arc 0 5 ($xr1 $yr1 $zb)
+    arc 5 10 ($yr1 $xr1 $zb)
+    arc 1 4 ($xr2 $yr2 $zb)
+    arc 4 9 ($yr2 $xr2 $zb)
+    
+    arc 11 16 ($xr1 $yr1 $zf)
+    arc 16 21 ($yr1 $xr1 $zf)
+    arc 12 15 ($xr2 $yr2 $zf)
+    arc 15 20 ($yr2 $xr2 $zf)
+);
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (2 3 14 13)
+            (3 6 17 14)
+        );
+    }
+    
+    sides
+    {
+        type patch;
+        faces
+        (
+            (7 8 19 18)
+            (6 7 18 17)
+        );
+    }
+    
+    cylinder
+    {
+        type wall;
+        faces
+        (
+            (10 5 16 21)
+            (5 0 11 16)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

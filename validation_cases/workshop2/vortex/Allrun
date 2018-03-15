@@ -1,0 +1,38 @@
+#!/bin/bash
+set -e
+source ./functions
+
+#clean the case
+clean
+solver=$(getSolver)
+cp -r 0.orig 0
+
+echo "Generating base mesh"
+foamJob -w -a blockMesh >& /dev/null
+
+echo "Mirror about x"
+foamDictionary -entry pointAndNormalDict.normalVector \
+-set "(1 0 0)" system/mirrorMeshDict >& /dev/null
+foamJob -w -a mirrorMesh -overwrite >& /dev/null
+
+echo "Mirror about y"
+foamDictionary -entry pointAndNormalDict.normalVector \
+-set "(0 1 0)" system/mirrorMeshDict >& /dev/null
+foamJob -w -a mirrorMesh -overwrite >& /dev/null
+
+echo "Creating outlet patch"
+foamJob -w -a topoSet >& /dev/null
+foamJob -w -a createPatch -overwrite >& /dev/null
+
+echo "Extruding the outlet patch"
+foamJob -w -a extrudeMesh >& /dev/null
+
+echo "Decomposition and optimizations"
+foamJob -w -a decomposePar >&/dev/null
+foamJob -w -a -p renumberMesh -overwrite >&/dev/null
+
+echo "Running $solver in parallel"
+foamJob -w -a -p $solver >&/dev/null
+
+echo "Plotting coefficient graphs"
+./plot
