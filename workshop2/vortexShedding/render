@@ -10,6 +10,5 @@ rm -f plots/frames/*
 PATH=$HOME/anaconda2/bin:$PATH
 source activate pypv
 
-echo "Creating video"
 { python plots/video.py $et $wi;} 2>/dev/null
 source deactivate

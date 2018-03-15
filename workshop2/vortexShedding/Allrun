@@ -42,3 +42,6 @@ foamJob -w -a -p $solver >&/dev/null
 
 echo "Plotting coefficient graphs"
 ./plot
+
+echo "Creating video"
+./render
