@@ -1,5 +1,5 @@
 #!/bin/sh
-
+# original case from https://develop.openfoam.com/Development/OpenFOAM-plus/tree/master/tutorials/verificationAndValidation/schemes/divergenceExample
 source ./functions
 
 #clean the case
