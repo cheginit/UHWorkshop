@@ -20,7 +20,7 @@ Cases are:
 For calculating initial values of turbulence paramaters, [CFD-online Turbulence Calculator](https://www.cfd-online.com/Tools/turbulence.php) can be used.
 
 # Paraview python instllation
-The paraview module can be installed as a stand-alone module from [conda-forge channel](https://anaconda.org/conda-forge/paraview) other the one installed with OpenFOAM. Just make sure that you should always use the *builtin* flag of paraFoam when you want to generate python scripts using the trace option i.e, use ```bash paraFoam -builtin```.
+The paraview module can be installed as a stand-alone module from [conda-forge channel](https://anaconda.org/conda-forge/paraview) other the one installed with OpenFOAM. Just make sure that you should always use the *builtin* flag of paraFoam when you want to generate python scripts using the trace option i.e, use ```paraFoam -builtin```.
 
 Just follow the step by step installation method givne below:
 
