@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# experimental data: http://www.math.rug.nl/~veldman/comflow/dambreak.html
 source ./functions
 
 #clean the case
