@@ -1,7 +1,7 @@
 # Cases
-The required files for the cases that are discussed in the workshop are included so everyone can follow up and the slides are  [UHOF I](https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop1/UHOF.pdf) and [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop2/UHOF.pdf).
+The required files for the workshop are included in this repository. The slides are [UHOF I](https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop1/UHOF.pdf) and [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop2/UHOF.pdf).
 
-Cases are:
+Four cases that are considered for these workshops are as follows:
 
 1. 1D: **Sod problem** validated with analytical solution
 <img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/shockTube/plots/initialCondition.png" width="500">
