@@ -35,15 +35,15 @@ sets
     vertical
     {
         $setConfig;
-        start (#calc "$dim/2.0" 0   0);
-        end   (#calc "$dim/2.0" $dim 0);
+        start ($mid 0   0);
+        end   ($mid $dim 0);
     }
     
     horizontal
     {
         $setConfig;
-        start (0   #calc "$dim/2.0" 0);
-        end   ($dim #calc "$dim/2.0" 0);
+        start (0   $mid 0);
+        end   ($dim $mid 0);
     }
 );
 

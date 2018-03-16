@@ -29,18 +29,13 @@ divSchemes
 {
     default         none;
     div(phi,U)      Gauss linearUpwind grad(U);
-    div(phi,k)      Gauss limitedLinear 0.2;
-    div(phi,epsilon) Gauss limitedLinear 0.2;
-    div(phi,omega)  Gauss limitedLinear 0.2;
-    div(phi,R)      Gauss limitedLinear 0.2;
-    div(R)          Gauss linear;
-    div(phi,nuTilda) Gauss limitedLinear 0.2;
+    "div\(phi,(k|epsilon|omega)\)"      Gauss limitedLinear 0.2;
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
 }
 
 laplacianSchemes
 {
-    default         Gauss linear orthogonal;
+    default         Gauss linear corrected;//orthogonal;
 }
 
 interpolationSchemes
@@ -50,7 +45,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         orthogonal;
+    default         corrected;//orthogonal;
 }
 
 // ************************************************************************* //

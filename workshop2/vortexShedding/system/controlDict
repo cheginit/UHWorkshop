@@ -14,6 +14,7 @@ FoamFile
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "${FOAM_CASE}/constant/parameters"
 
 application     pisoFoam;
 
@@ -23,9 +24,9 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         350;
+endTime         $simTime;
 
-deltaT          0.05;
+deltaT          $delt;
 
 writeControl    runTime;
 
@@ -51,9 +52,6 @@ functions
     {
 	      type forces;
 	      functionObjectLibs ("libforces.so");
-
-	      writeControl   timeStep;
-	      writeInterval  1;
 
 	      //-- Patches to sample
 	      patches ("cylinder");
@@ -97,12 +95,9 @@ functions
 	      // magUinf - free stream velocity magnitude
 	      magUInf 1.0;
 	      //-- reference length
-	      lRef 1.0;
-	      //-- reference area
-	      Aref 2.0;
-
-        writeControl   timeStep;
-        writeInterval  1;
+	      lRef $D;
+	      //-- reference area (1 for 2D cases)
+	      Aref 1.0;
     }
 };
 

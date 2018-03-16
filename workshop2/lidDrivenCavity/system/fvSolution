@@ -31,7 +31,7 @@ solvers
         relTol          0;
     }
 
-    "(U|k|epsilon|omega|R|nuTilda)"
+    "(U|k|epsilon|omega)"
     {
         solver          PBiCGStab;
         preconditioner  DILU;

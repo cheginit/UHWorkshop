@@ -16,7 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #include "${FOAM_CASE}/constant/parameters"
 
-application     pisoFoam;
+application     pisoFoam;//icoFoam;//
 
 startFrom       startTime;
 
@@ -36,7 +36,7 @@ purgeWrite      0;
 
 writeFormat     binary;
 
-writePrecision  6;
+writePrecision  8;
 
 writeCompression off;
 

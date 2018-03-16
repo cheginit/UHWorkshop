@@ -5,6 +5,7 @@ source ./functions
 #clean the case
 clean
 solver=$(getSolver)
+
 cp -r 0.orig 0
 cp constant/parameters.orig constant/parameters
 cp plots/horizontal_U.xy plots/horizontal_U_old.xy

@@ -13,21 +13,16 @@ FoamFile
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "${FOAM_CASE}/constant/parameters"
 
 dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform (1 0 0);
+internalField   uniform ($vel 0 0);
 
 boundaryField
 {
     inlet
     {
-        /*type            uniformFixedValue;
-	      uniformValue     table
-	      (
-          		(0   (1 0 0))
-         		  (20  (2 0 0))
-	      );*/
         type            fixedValue;
         value           $internalField;
     }

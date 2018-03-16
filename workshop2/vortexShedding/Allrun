@@ -12,6 +12,7 @@ source ./functions
 clean
 solver=$(getSolver)
 cp -r 0.orig 0
+cp constant/parameters.orig constant/parameters
 
 echo "Generating base mesh"
 foamJob -w -a blockMesh >& /dev/null
