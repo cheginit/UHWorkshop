@@ -1,6 +1,6 @@
-getSolver()
+getValue()
 {
-    sed -ne 's/^ *application\s*\([a-zA-Z]*\)\s*;.*$/\1/p' system/controlDict
+    foamDictionary -entry $1 -value $2 > tmp 2>&1 && tail -1 tmp && rm -f tmp
 }
 
 clean()

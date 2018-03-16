@@ -1,7 +1,8 @@
 #!/bin/bash
+source ./functions
 
-et="$(foamDictionary -entry endTime -value system/controlDict | tail -1)"
-wi="$(foamDictionary -entry writeInterval -value system/controlDict | tail -1)"
+et="$(getValue endTime system/controlDict)"
+wi="$(getValue writeInterval system/controlDict)"
 
 [ ! -d plots/frames ] && mkdir -p plots/frames
 [ ! -f foam.foam ] && touch foam.foam
