@@ -10,7 +10,7 @@ source ./functions
 
 #clean the case
 clean
-solver=$(getSolver)
+solver=$(getValue application system/controlDict)
 cp -r 0.orig 0
 cp constant/parameters.orig constant/parameters
 
