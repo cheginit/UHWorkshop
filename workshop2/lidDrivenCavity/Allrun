@@ -1,4 +1,6 @@
 #!/bin/bash
+# Images from : https://arxiv.org/abs/1107.0449
+# data from: https://www.sciencedirect.com/science/article/pii/0021999182900584
 
 source ./functions
 
