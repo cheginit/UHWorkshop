@@ -29,12 +29,12 @@ Just follow the installation procedure given below:
 # go to step 6.
 wget "https://repo.continuum.io/archive/Anaconda2-5.1.0-Linux-x86_64.sh"
 
-# 2- Install Anaconda. It is recommended not to add the PATH your 
+# 2- Install Anaconda. It is recommended not to add it to the PATH  
 # system permanently.
 bash Anaconda2-5.1.0-Linux-x86_64.sh
 
-# 3- Create an alias for loading Anaconda in bashrc file. Replace 
-# the path with the directory specified during installation.
+# 3- Create an alias for loading Anaconda in bashrc file. You can replace 
+# the path with the installation directory specified during installation.
 echo 'alias ana2="export PATH=$HOME/anaconda2/bin:$PATH"' >> ~/.bashrc
 
 # 4- Re-source bashrc to make the change.
@@ -43,7 +43,7 @@ source ~/.bashrc
 # 5- Load Anaconda.
 ana2
 
-# 6- Create a new environment using conda-forge channel.
+# 6- Create a new environment called "pypv" using conda-forge channel.
 conda create -n pypv -c conda-forge python=2
 
 # 7- Load the newly created environment.
