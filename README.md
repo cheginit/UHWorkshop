@@ -1,5 +1,5 @@
 # Cases
-The required files for the workshop are included in this repository. The slides are [UHOF I](https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop1/UHOF.pdf) and [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/validation_cases/workshop2/UHOF.pdf).
+The required files for the workshop are included in this repository. The slides are [UHOF I](https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/UHOF.pdf) and [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/workshop2/UHOF.pdf).
 
 Four cases that are considered for these workshops are as follows:
 
