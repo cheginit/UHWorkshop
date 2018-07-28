@@ -52,15 +52,10 @@ source activate pypv
 # 8- Install paraview module from the channel.
 conda install -c conda-forge paraview
 
-# 9- Some of the dependecies are still installed from the main channel
-# which causes the module not to work. A workaround is to update the
-# environment using the channel.
-conda update -c conda-forge --all
-
-# 10- Test the installation. If the installation was successful, the 
+# 9- Test the installation. If the installation was successful, the 
 # folowing command should not have any output.
 python -c "from paraview.simple import *"
 
-# 11- Deactivate the environment.
+# 10- Deactivate the environment.
 source deactivate
 ```
