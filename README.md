@@ -1,28 +1,25 @@
-# Cases
-The required files for the workshop are included in this repository. The slides are [UHOF I](https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/UHOF.pdf) and [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/workshop2/UHOF.pdf).
+## OpenFOAM Workshops (I and II):
+Workshop I and II are introductory workshops to OpenFOAM. The slides are [UHOF I](https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/UHOF.pdf) and [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/workshop2/UHOF.pdf). The workshops are project-based and includes the basic concepts of utilizing OpenFOAM's framework. Four cases that are considered for these workshops are as follows; **1D Sod problem** which includes validation with analytical solution, **2D Lid driven cavity** which includes validation with results from the literature, **3D Dam break with obstacle** which includes validation with results from the literature and **V2D ortex Shedding** for demonstrating more advanced meshing and working with paraview python module.
 
-Four cases that are considered for these workshops are as follows:
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/shockTube/plots/initialCondition.png" width="250"> <img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/lidDrivenCavity/plots/cavity.png" width="250">
 
-1. 1D: **Sod problem** validated with analytical solution
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/shockTube/plots/initialCondition.png" width="500">
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/damBreakWithObstacle/plots/dbconfig.png" width="250"> <img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop2/vortexShedding/plots/frames/250.png" width="250">
 
-2. 2D: **Lid driven cavity** validated with results from the literature:
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/lidDrivenCavity/plots/cavity.png" width="500">
+Note that for calculating initial values of turbulence paramaters, [CFD-online Turbulence Calculator](https://www.cfd-online.com/Tools/turbulence.php) can be used.
 
-3. 3D: **Dam break with obstacle** validated with results from the literature:
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/damBreakWithObstacle/plots/dbconfig.png" width="500">
+# Paraview python module
+There are two ways of working with Praveiew's python module:
+1. Use files in Paraview's intallation folder. A good way to use this method is to write a bash script and include these lines:
+```bash
+...
+export PYTHONPATH="$PYTHONPATH:$WM_THIRD_PARTY_DIR/platforms/linux64Gcc/ParaView-5.5.2/lib:$WM_THIRD_PARTY_DIR/platforms/linux64Gcc/ParaView-5.5.2/lib/python2.7/site-packages"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$WM_THIRD_PARTY_DIR/platforms/linux64Gcc/ParaView-5.5.2/lib"
+...
+python path/to/python/script
+```
+Paraview version (5.5.2) should be adjusted according to the installed version.
 
-4. 2D: **Vortex Shedding** for more advanced meshing and working with paraview python module:
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop2/vortexShedding/plots/frames/250.png" width="500">
-
-# Turbulence Calculator:
-
-For calculating initial values of turbulence paramaters, [CFD-online Turbulence Calculator](https://www.cfd-online.com/Tools/turbulence.php) can be used.
-
-# Paraview python instllation
-The paraview module can be installed as a stand-alone module from [conda-forge channel](https://anaconda.org/conda-forge/paraview) other than the one provided by the OpenFOAM's third-party package. Just keep in mind that you should always use the *builtin* flag of paraFoam when you want to generate python scripts using the trace option i.e, use ```paraFoam -builtin``` to run paraview.
-
-Just follow the installation procedure given below:
+2. Install a stand-alone paraview module from [conda-forge channel](https://anaconda.org/conda-forge/paraview). Keep in mind that you should always use the *builtin* flag of paraFoam when generating a python script (using the trace option) i.e, use ```paraFoam -builtin``` to run paraview. The module can be install as follows:
 
 ```bash
 # 1- Download Anaconda if you it's not already installed otherwise 
@@ -59,3 +56,4 @@ python -c "from paraview.simple import *"
 # 10- Deactivate the environment.
 source deactivate
 ```
+Make sure to use the same version as the installed Paraview.
