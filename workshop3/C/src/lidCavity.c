@@ -61,7 +61,7 @@ int main (int argc, char *argv[])
   double dx, dy, dt, Re, nu;
   double dtdx, dtdy, dtdxx, dtdyy;
 
-  int i, j, step;
+  int i, j, step = 1, step_max = 1e6;
   double ut, ub, ul, ur;
   double vt, vb, vl, vr;
   double err_tot, err_u, err_v, err_p, err_d;
@@ -139,11 +139,11 @@ int main (int argc, char *argv[])
   }
 
   /* Initialize error and step */
-  err_tot = 1.0;
-  step = 1;
+  /* err_tot = 1.0; */
+  /* step = 1; */
 
   /* Start the main loop */
-  while (err_tot > tol) {
+  do {
     /* Solve x-momentum equation for computing u */
     #pragma omp parallel for private(i,j) schedule(auto)
     for (i = xlo; i < xhi; i++)
@@ -230,6 +230,22 @@ int main (int argc, char *argv[])
     /* Check if solution diverged */
     if (isnan(err_tot)) {
         printf("Solution Diverged after %d steps!\n", step);
+      /* Free the memory */
+        free(*ubufo);
+        free(ubufo);
+        free(*ubufn);
+        free(ubufn);
+
+        free(*vbufo);
+        free(vbufo);
+        free(*vbufn);
+        free(vbufn);
+
+        free(*pbufo);
+        free(pbufo);
+        free(*pbufn);
+        free(pbufn);
+
         exit(EXIT_FAILURE);
     }
 
@@ -251,7 +267,7 @@ int main (int argc, char *argv[])
     pn = ptmp;
 
     step += 1;
-  }
+  } while (err_tot > tol && step <= step_max);
 
   printf("Converged after %d steps\n", step);
   fclose(flog);
