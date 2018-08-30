@@ -19,6 +19,6 @@ FoamFile
 
 transportModel  Newtonian;
 
-nu              #calc "$vel*$dim/$Re";
+nu              #calc "$uin*$d/$re";
 
 // ************************************************************************* //

@@ -1,0 +1,1 @@
+/usr/bin/cc -march=native -O3 -std=c11 -Wall -fopenmp  -rdynamic CMakeFiles/lidCavity.dir/src/lidCavity.c.o  -o ../bin/lidCavity -lm 

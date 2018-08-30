@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/project/OpenFOAM/taher-dev/git/NavierStokesSolver/ACM/C/src/functions.h
+
+/mnt/project/OpenFOAM/taher-dev/git/NavierStokesSolver/ACM/C/src/lidCavity.c
+stdio.h
+-
+stdlib.h
+-
+math.h
+-
+functions.h
+/mnt/project/OpenFOAM/taher-dev/git/NavierStokesSolver/ACM/C/src/functions.h
+
