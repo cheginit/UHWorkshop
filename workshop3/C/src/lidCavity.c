@@ -59,7 +59,7 @@ int main (int argc, char *argv[])
   double **pbufo, **pbufn, **p, **pn, **pc, **ptmp;
 
   double dx, dy, dt, Re, nu;
-  double dtdx, dtdy, dtdxx, dtdyy;
+  double dtdx, dtdy, dtdxx, dtdyy, dtdxdy;
 
   int i, j, step = 1, step_max = 1e6;
   double ut, ub, ul, ur;
@@ -106,6 +106,7 @@ int main (int argc, char *argv[])
   dtdy = dt / dy;
   dtdxx = dt / (dx * dx);
   dtdyy = dt / (dy * dy);
+  dtdxdy = dt * dx * dy;
 
   /* Generate two 2D arrays for storing old and new velocity field
      in x-direction */
@@ -137,10 +138,6 @@ int main (int argc, char *argv[])
     u[i][ytot - 1] = ut;
     u[i][ytot - 2] = ut;
   }
-
-  /* Initialize error and step */
-  /* err_tot = 1.0; */
-  /* step = 1; */
 
   /* Start the main loop */
   do {
@@ -220,12 +217,12 @@ int main (int argc, char *argv[])
       }
     }
 
-    err_u = sqrt(dt * dx * dy * err_u);
-    err_v = sqrt(dt * dx * dy * err_v);
-    err_p = sqrt(dt * dx * dy * err_p);
+    err_u = sqrt(dtdxdy * err_u);
+    err_v = sqrt(dtdxdy * err_v);
+    err_p = sqrt(dtdxdy * err_p);
     err_tot = max(err_u, err_v);
     err_tot = max(err_tot, err_p);
-    err_tot = max(err_tot, dt * dx * dy * err_d);
+    err_tot = max(err_tot, dtdxdy * err_d);
 
     /* Check if solution diverged */
     if (isnan(err_tot)) {
