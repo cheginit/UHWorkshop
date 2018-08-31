@@ -54,9 +54,9 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
 /* Main program */
 int main (int argc, char *argv[])
 {
-  double **ubufo, **ubufn, **u, **un, **uc, **utmp;
-  double **vbufo, **vbufn, **v, **vn, **vc, **vtmp;
-  double **pbufo, **pbufn, **p, **pn, **pc, **ptmp;
+  double **ubufo, **ubufn, **u, **un, **ug, **utmp;
+  double **vbufo, **vbufn, **v, **vn, **vg, **vtmp;
+  double **pbufo, **pbufn, **p, **pn, **pg, **ptmp;
 
   double dx, dy, dt, Re, nu;
   double dtdx, dtdy, dtdxx, dtdyy, dtdxdy;
@@ -153,14 +153,14 @@ int main (int argc, char *argv[])
                    + nu * div2(u, i, j, dtdxx, dtdyy);
 
     /* Dirichlet boundary conditions */
+    for (i = xlo; i < xhi; i++) {
+      un[i][0] = ub - un[i][1];
+      un[i][ytot - 1] = 2.0*ut - un[i][ytot - 2];
+    }
+
     for (j = 0; j < ytot; j++) {
       un[0][j] = ul;
       un[xhi][j] = ur;
-    }
-
-    for (i = 0; i < IX; i++) {
-      un[i][0] = ub - un[i][1];
-      un[i][ytot - 1] = 2.0*ut - un[i][ytot - 2];
     }
 
     /* Solve y-momentum for computing v */
@@ -175,14 +175,14 @@ int main (int argc, char *argv[])
                    + nu * div2(v, i, j, dtdxx, dtdyy);
 
     /* Dirichlet boundary conditions */
-    for (j = 0; j < IY; j++) {
-      vn[0][j] = vr - vn[1][j];
-      vn[xtot - 1][j] = vl - vn[IX-1][j];
-    }
-
-    for (i = 0; i < xtot; i++) {
+    for (i = xlo; i < xtot - 1; i++) {
       vn[i][0] = vb;
       vn[i][yhi] = vt;
+    }
+
+    for (j = 0; j < IY; j++) {
+      vn[0][j] = vr - vn[1][j];
+      vn[xtot - 1][j] = vl - vn[xtot - 2][j];
     }
 
     /* Solves continuity equation for computing P */
@@ -193,7 +193,7 @@ int main (int argc, char *argv[])
                                    + (vn[i][j] - vn[i][j-1]) * dtdy);
 
     /* Neumann boundary conditions */
-    for (i = 0; i < xtot; i++) {
+    for (i = xlo; i < xtot - 1; i++) {
       pn[i][0] = pn[i][1] - dy * gradp;
       pn[i][ytot - 1] = pn[i][ytot - 2]  - dy * gradp;
     }
@@ -271,16 +271,16 @@ int main (int argc, char *argv[])
 
   /* Computing new arrays for computing the fields along lines crossing
      the center of the domain in x- and y-directions */
-  vc = array_2d(IX, IY);
-  uc = array_2d(IX, IY);
-  pc = array_2d(IX, IY);
+  vg = array_2d(IX, IY);
+  ug = array_2d(IX, IY);
+  pg = array_2d(IX, IY);
 
   #pragma omp parallel for private(i,j) schedule(auto)
   for (i = 0; i < IX; i++) {
    for (j = 0; j < IY; j++) {
-     uc[i][j] = 0.5 * (u[i][j] + u[i][j + 1]);
-     vc[i][j] = 0.5 * (v[i][j] + v[i + 1][j]);
-     pc[i][j] = 0.25 * (p[i][j] + p[i + 1][j] + p[i][j + 1] + p[i + 1][j + 1]);
+     ug[i][j] = avy(u, i, j + 1);
+     vg[i][j] = avx(v, i + 1, j);
+     pg[i][j] = 0.25 * (p[i][j] + p[i + 1][j] + p[i][j + 1] + p[i + 1][j + 1]);
    }
   }
 
@@ -301,27 +301,27 @@ int main (int argc, char *argv[])
   free(pbufn);
 
   /* Writing fields data for post-processing */
-  FILE *fuc, *fvc, *fd;
+  FILE *fug, *fvg, *fd;
 
   /* Velocity field value along a line crossing the middle of x-axis */
-  fuc = fopen("data/Central_U","w+t");
-  fprintf(fuc, "# U, Y\n");
+  fug = fopen("data/Central_U","w+t");
+  fprintf(fug, "# U, Y\n");
 
   for (j = 0; j < IY; j++)
-    fprintf(fuc, "%5.8lf \t %5.8lf\n", 0.5 * (uc[xm][j] + uc[xm + 1][j]),
+    fprintf(fug, "%5.8lf \t %5.8lf\n", 0.5 * (ug[xm][j] + ug[xm + 1][j]),
             (double) j*dy );
 
-  fclose(fuc);
+  fclose(fug);
 
   /* Velocity field value along a line crossing the middle of y-axis */
-  fvc = fopen("data/Central_V","w+t");
-  fprintf(fuc, "# V, X\n");
+  fvg = fopen("data/Central_V","w+t");
+  fprintf(fug, "# V, X\n");
 
   for (i = 0; i < IX; i++)
-    fprintf(fvc, "%5.8lf \t %5.8lf\n", 0.5 * (vc[i][ym] + vc[i][ym + 1]),
+    fprintf(fvg, "%5.8lf \t %5.8lf\n", 0.5 * (vg[i][ym] + vg[i][ym + 1]),
             (double) i*dx );
 
-  fclose(fvc);
+  fclose(fvg);
 
   /* Writing all the field data */
   fd = fopen("data/xyuvp","w+t");
@@ -329,18 +329,18 @@ int main (int argc, char *argv[])
   for (i = 0; i < IX; i++)
       for (j = 0; j < IY; j++)
          fprintf(fd, "%5.8lf \t %5.8lf \t %5.8lf \t %5.8lf \t %5.8lf\n",
-                 (double) i*dx, (double) j*dy, uc[i][j], vc[i][j], pc[i][j]);
+                 (double) i*dx, (double) j*dy, ug[i][j], vg[i][j], pg[i][j]);
   fclose(fd);
 
   /* Free the memory */
-  free(*uc);
-  free(uc);
+  free(*ug);
+  free(ug);
 
-  free(*vc);
-  free(vc);
+  free(*vg);
+  free(vg);
 
-  free(*pc);
-  free(pc);
+  free(*pg);
+  free(pg);
 
   return 0;
 }

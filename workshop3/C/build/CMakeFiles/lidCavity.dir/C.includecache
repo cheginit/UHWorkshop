@@ -6,9 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/mnt/project/OpenFOAM/taher-dev/git/UHOFWorkshop/workshop3/C/src/functions.h
+/home/taher/OpenFOAM/taher-dev/git/UHOFWorkshop/workshop3/C/src/functions.h
 
-/mnt/project/OpenFOAM/taher-dev/git/UHOFWorkshop/workshop3/C/src/lidCavity.c
+/home/taher/OpenFOAM/taher-dev/git/UHOFWorkshop/workshop3/C/src/lidCavity.c
 stdio.h
 -
 stdlib.h
@@ -16,5 +16,5 @@ stdlib.h
 math.h
 -
 functions.h
-/mnt/project/OpenFOAM/taher-dev/git/UHOFWorkshop/workshop3/C/src/functions.h
+/home/taher/OpenFOAM/taher-dev/git/UHOFWorkshop/workshop3/C/src/functions.h
 
