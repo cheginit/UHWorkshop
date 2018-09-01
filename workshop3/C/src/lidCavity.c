@@ -6,15 +6,12 @@ The governing equations are as follows:
 P_t + c^2 div[u] = 0
 u_t + u . grad[u] = - grad[P] + nu div[grad[u]]
 
-where P is p/rho and c represents artificial sounds speed.
+where P is p/rho and c represents artificial sound's speed.
 
 Lid-Driven Cavity case:
 Dimensions : 1x1 m
 Grid size  : 128 x 128
 Re number  : 100 / 1000 / 5000 / 10000
-Tolerance  : 10^-8
-CFL        : 0.08
-c^2        : 3.8
 Grid type  : Arakawa C
 Boundary Conditions: u, v -> Dirichlet (as shown below)
                      p    -> Neumann (grad[p] = 0)
@@ -61,7 +58,7 @@ int main (int argc, char *argv[])
   double dx, dy, dt, Re, nu;
   double dtdx, dtdy, dtdxx, dtdyy, dtdxdy;
 
-  int i, j, step = 1, step_max = 1e6;
+  int i, j, itr = 1, itr_max = 1e6;
   double ut, ub, ul, ur;
   double vt, vb, vl, vr;
   double err_tot, err_u, err_v, err_p, err_d;
@@ -74,9 +71,10 @@ int main (int argc, char *argv[])
   /* Best for Re = 100
   const double cfl = 0.15, c2 = 5.0;*/
   /* Best for Re = 1000*/
-  const double cfl = 0.20, c2 = 3.8;
-
-  const double tol = 1.0e-8, llid = 1.0, gradp = 0.0;
+  const double cfl = 0.20, c2 = 5.8;
+  /* Best for Re = 3200*/
+  /* const double cfl = 0.05, c2 = 5.8; */
+  const double tol = 1.0e-8, l_lid = 1.0, gradp = 0.0;
 
   /* Getting Reynolds number */
   if(argc <= 1) {
@@ -96,10 +94,10 @@ int main (int argc, char *argv[])
   flog = fopen("data/residual","w+t");
 
   /* Compute flow parameters based on inputs */
-  dx = llid / (double) (IX - 1);
-  dy = llid / (double) (IY - 1);
+  dx = l_lid / (double) (IX - 1);
+  dy = dx; //l_lid / (double) (IY - 1);
   dt = cfl * fmin(dx,dy) / ut;
-  nu = ut * llid / Re;
+  nu = ut * l_lid / Re;
 
   /* Carry out operations that their values do not change in loops */
   dtdx = dt / dx;
@@ -226,8 +224,9 @@ int main (int argc, char *argv[])
 
     /* Check if solution diverged */
     if (isnan(err_tot)) {
-        printf("Solution Diverged after %d steps!\n", step);
-      /* Free the memory */
+        printf("Solution Diverged after %d iterations!\n", itr);
+
+        /* Free the memory */
         free(*ubufo);
         free(ubufo);
         free(*ubufn);
@@ -248,7 +247,7 @@ int main (int argc, char *argv[])
 
     /* Compute relative error */
     fprintf(flog ,"%d \t %.8e \t %.8e \t %.8e \t %.8e \t %.8e\n",
-            step, err_tot, err_u, err_v, err_p, err_d);
+            itr, err_tot, err_u, err_v, err_p, err_d);
 
     /* Changing pointers to point to the newly computed fields */
     utmp = u;
@@ -263,10 +262,32 @@ int main (int argc, char *argv[])
     p = pn;
     pn = ptmp;
 
-    step += 1;
-  } while (err_tot > tol && step <= step_max);
+    itr += 1;
+  } while (err_tot > tol && itr < itr_max);
 
-  printf("Converged after %d steps\n", step);
+  if (itr == itr_max) {
+    printf("Maximum number of iterations, %d, exceeded\n", itr);
+
+    /* Free the memory */
+    free(*ubufo);
+    free(ubufo);
+    free(*ubufn);
+    free(ubufn);
+
+    free(*vbufo);
+    free(vbufo);
+    free(*vbufn);
+    free(vbufn);
+
+    free(*pbufo);
+    free(pbufo);
+    free(*pbufn);
+    free(pbufn);
+
+    exit(EXIT_FAILURE);
+  }
+
+  printf("Converged after %d iterations\n", itr);
   fclose(flog);
 
   /* Computing new arrays for computing the fields along lines crossing
