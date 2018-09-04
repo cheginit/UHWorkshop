@@ -55,10 +55,6 @@ do
       setRe "$2"
       shift 2
      ;;
-   -c | -cmake)
-      config=1
-      shift
-      ;;
    --)
       shift
       break
@@ -74,23 +70,8 @@ done
 
 [ -z "$re" ] && setRe 100
 
-[ ! -d build -a -z "$config" ] \
-&& error "The project is not configured, -c option should be specified"
-
-if [ "$config" -eq 1 ]; then
-  rm -rf build bin
-  mkdir build
-  cd build
-  cmake ..
-else
-  cd build
-fi
-
-make
-cd ..
-
 rm -f data/Central* data/residual output/*.pdf
-$(which time) -f "Elapsed=%E" bin/lidCavity $re #& log
+$(which time) -f "Elapsed=%E" python src/lidCavity.py $re #& log
 
 [ "$?" -eq "0" ] \
 && echo "Plotting the results" \

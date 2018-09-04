@@ -68,17 +68,17 @@ int main (int argc, char *argv[])
   const int ylo = 1, yhi = IY - 1, ytot = IY + 1, ym = IY/2;
 
   /* Simulation parameters */
-  /* Best for Re = 100
-  const double cfl = 0.15, c2 = 5.0;*/
+  /* Best for Re = 100 */
+  const double cfl = 0.15, c2 = 5.0;
   /* Best for Re = 1000*/
-  const double cfl = 0.20, c2 = 5.8;
+  /* const double cfl = 0.20, c2 = 5.8; */
   /* Best for Re = 3200*/
   /* const double cfl = 0.05, c2 = 5.8; */
   const double tol = 1.0e-8, l_lid = 1.0, gradp = 0.0;
 
   /* Getting Reynolds number */
   if(argc <= 1) {
-    Re = 1000.0;
+    Re = 100.0;
   } else {
     Re = atof(argv[1]);
   }
@@ -139,6 +139,39 @@ int main (int argc, char *argv[])
 
   /* Start the main loop */
   do {
+    /* Dirichlet boundary conditions */
+    for (i = xlo; i < xhi; i++) {
+      u[i][0] = ub - u[i][1];
+      u[i][ytot - 1] = 2.0*ut - u[i][ytot - 2];
+    }
+
+    for (j = 0; j < ytot; j++) {
+      u[0][j] = ul;
+      u[xhi][j] = ur;
+    }
+
+    /* Dirichlet boundary conditions */
+    for (i = xlo; i < xtot - 1; i++) {
+      v[i][0] = vb;
+      v[i][yhi] = vt;
+    }
+
+    for (j = 0; j < IY; j++) {
+      v[0][j] = vr - v[1][j];
+      v[xtot - 1][j] = vl - v[xtot - 2][j];
+    }
+
+    /* Neumann boundary conditions */
+    for (i = xlo; i < xtot - 1; i++) {
+      p[i][0] = p[i][1] - dy * gradp;
+      p[i][ytot - 1] = p[i][ytot - 2]  - dy * gradp;
+    }
+
+    for (j = 0; j < ytot; j++) {
+      p[0][j] = p[1][j] - dx * gradp;
+      p[xtot - 1][j] = p[xtot - 2][j] - dx * gradp;
+    }
+
     /* Solve x-momentum equation for computing u */
     #pragma omp parallel for private(i,j) schedule(auto)
     for (i = xlo; i < xhi; i++)
@@ -150,16 +183,6 @@ int main (int argc, char *argv[])
                    - dtdx * (p[i+1][j] - p[i][j])
                    + nu * div2(u, i, j, dtdxx, dtdyy);
 
-    /* Dirichlet boundary conditions */
-    for (i = xlo; i < xhi; i++) {
-      un[i][0] = ub - un[i][1];
-      un[i][ytot - 1] = 2.0*ut - un[i][ytot - 2];
-    }
-
-    for (j = 0; j < ytot; j++) {
-      un[0][j] = ul;
-      un[xhi][j] = ur;
-    }
 
     /* Solve y-momentum for computing v */
     #pragma omp parallel for private(i,j) schedule(auto)
@@ -172,34 +195,12 @@ int main (int argc, char *argv[])
                    - dtdy * (p[i][j+1] - p[i][j])
                    + nu * div2(v, i, j, dtdxx, dtdyy);
 
-    /* Dirichlet boundary conditions */
-    for (i = xlo; i < xtot - 1; i++) {
-      vn[i][0] = vb;
-      vn[i][yhi] = vt;
-    }
-
-    for (j = 0; j < IY; j++) {
-      vn[0][j] = vr - vn[1][j];
-      vn[xtot - 1][j] = vl - vn[xtot - 2][j];
-    }
-
     /* Solves continuity equation for computing P */
     #pragma omp parallel for private(i,j) schedule(auto)
     for (i = xlo; i < xtot - 1; i++)
       for (j = ylo; j < ytot - 1; j++)
         pn[i][j] = p[i][j] - c2 * ((un[i][j] - un[i-1][j]) * dtdx
                                    + (vn[i][j] - vn[i][j-1]) * dtdy);
-
-    /* Neumann boundary conditions */
-    for (i = xlo; i < xtot - 1; i++) {
-      pn[i][0] = pn[i][1] - dy * gradp;
-      pn[i][ytot - 1] = pn[i][ytot - 2]  - dy * gradp;
-    }
-
-    for (j = 0; j < ytot; j++) {
-      pn[0][j] = pn[1][j] - dx * gradp;
-      pn[xtot - 1][j] = pn[xtot - 2][j] - dx * gradp;
-    }
 
     /* Compute L2-norm */
     err_tot = err_u = err_v = err_p = err_d = 0.0;
@@ -210,8 +211,8 @@ int main (int argc, char *argv[])
         err_u += pow(un[i][j] - u[i][j], 2);
         err_v += pow(vn[i][j] - v[i][j], 2);
         err_p += pow(pn[i][j] - p[i][j], 2);
-        err_d += fabs((un[i][j] - un[i-1][j]) * dy
-                      + (vn[i][j] - vn[i][j-1]) * dx);
+        err_d += (un[i][j] - un[i-1][j]) / dx
+                 + (vn[i][j] - vn[i][j-1]) / dy;
       }
     }
 
