@@ -18,9 +18,9 @@ class Grid2D(object):
         self.dx = l_lid / np.float(ngx - 1)
         self.dy = self.dx
 
-        self.u = np.zeros([self.ngx, self.ytot])
-        self.v = np.zeros([self.xtot, self.ngy])
-        self.p = np.zeros([self.xtot, self.ytot])
+        self.u = np.zeros([self.ngx, self.ytot], dtype=np.float64)
+        self.v = np.zeros([self.xtot, self.ngy], dtype=np.float64)
+        self.p = np.zeros([self.xtot, self.ytot], dtype=np.float64)
 
         self.ug = np.zeros_like(self.u)
         self.vg = np.zeros_like(self.v)
@@ -56,7 +56,7 @@ class Grid2D(object):
         self.u[self.xlo:self.xhi, 0] = \
             self.BC['u']['b'] - self.u[self.xlo:self.xhi, 1]
         self.u[self.xlo:self.xhi, self.ytot - 1] = \
-            2 * self.BC['u']['t'] - self.u[self.xlo:self.xhi, self.ytot - 1]
+            2.0 * self.BC['u']['t'] - self.u[self.xlo:self.xhi, self.ytot - 2]
         self.u[0, :self.ytot] = self.BC['u']['l']
         self.u[self.xhi, :self.ytot] = self.BC['u']['r']
 
@@ -80,15 +80,6 @@ class Grid2D(object):
             self.p[self.xtot - 2, :self.ytot] - \
             self.dx * self.BC['p']['r']
 
-    def phi_midy(self, phi):
-        return 0.5 * np.sum(phi[:,
-                                np.int(phi.shape[1] / 2) - 1:
-                                np.int(phi.shape[1] / 2) + 1], axis=1)
-
-    def phi_midx(self, phi):
-        return 0.5 * np.sum(phi[np.int(phi.shape[0] / 2) - 1:
-                                np.int(phi.shape[0] / 2) + 1, :], axis=0)
-
 
 class Simulation(object):
     def __init__(self, grid, cfl, c2, Re, tol=1e-8, itr_max=1e6):
@@ -99,6 +90,7 @@ class Simulation(object):
         self.re = Re
         self.tol = tol
         self.itr_max = itr_max
+
         self.init_cond()
         grid.BC_u()
         grid.BC_v()
@@ -134,8 +126,8 @@ class Simulation(object):
         un[s_in] = g.u[s_in] \
             - dtdx * (g.uc[s_xr, s_in[1]] * g.uc[s_xr, s_in[1]]
                       - g.uc[s_in] * g.uc[s_in]) \
-            - dtdy * (g.ug[s_in[0], s_yt] * g.vc[s_xr, s_in[1]]
-                      - g.ug[s_in] * g.vc[s_xr, s_yb]) \
+            - dtdy * (g.ug[s_in[0], s_yt] * g.vg[s_xr, s_in[1]]
+                      - g.ug[s_in] * g.vg[s_xr, s_yb]) \
             - dtdx * (g.p[s_xr, s_in[1]] - g.p[s_in]) \
             + self.nu * (dtdxx
                          * (g.u[s_xl, s_in[1]] - 2 * g.u[s_in]
@@ -153,10 +145,10 @@ class Simulation(object):
 
         vn = g.v.copy()
         vn[s_in] = g.v[s_in] \
-            - dtdx * (g.ug[s_in[0], s_yt] * g.vc[s_xr, s_in[1]]
-                      - g.ug[s_xl, s_yt] * g.vc[s_in]) \
-            - dtdy * (g.vg[s_in[0], s_yt] * g.vg[s_in[0], s_yt]
-                      - g.vg[s_in] * g.vg[s_in]) \
+            - dtdx * (g.ug[s_in[0], s_yt] * g.vg[s_xr, s_in[1]]
+                      - g.ug[s_xl, s_yt] * g.vg[s_in]) \
+            - dtdy * (g.vc[s_in[0], s_yt] * g.vc[s_in[0], s_yt]
+                      - g.vc[s_in] * g.vc[s_in]) \
             - dtdy * (g.p[s_in[0], s_yt] - g.p[s_in]) \
             + self.nu * (dtdxx
                          * (g.v[s_xl, s_in[1]] - 2 * g.v[s_in]
@@ -175,7 +167,7 @@ class Simulation(object):
         s_in = self.s_in
         s_xl = self.s_xl
         s_yb = self.s_yb
-        dtxy = self.grid.dx * self.grid.dy * self.dt
+        dxy = self.grid.dx * self.grid.dy
 
         cn_err = np.zeros_like(g.p)
         cn_err[s_in] = dtdx * (g.u[s_in] - g.u[s_xl, s_in[1]]) \
@@ -183,7 +175,7 @@ class Simulation(object):
 
         pn = g.p.copy()
         pn[s_in] = g.p[s_in] - self.c2 * cn_err[s_in]
-        return pn, dtxy * np.sum(cn_err)
+        return pn, dxy * np.sum(cn_err)
 
     def l2norm(self, phi_n, phi_o):
         dtxy = self.dt * self.grid.dx * self.grid.dy

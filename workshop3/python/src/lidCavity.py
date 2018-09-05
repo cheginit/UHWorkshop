@@ -3,11 +3,11 @@ from sys import argv, exit
 from functions import Grid2D, Simulation
 
 
-Re = np.float(argv[1]) if len(argv) == 2 else 100.0
+Re = np.float64(argv[1]) if len(argv) == 2 else 100.0
 print("Re number is set to {:d}".format(int(Re)))
 g = Grid2D(128, 128, 1.0)
-s = Simulation(g, cfl=0.15, c2=5.0, Re=Re)
-# s = Simulation(g, cfl=0.20, c2=5.8, Re=Re)
+# s = Simulation(g, cfl=0.15, c2=5.0, Re=Re)
+s = Simulation(g, cfl=0.20, c2=5.8, Re=Re)
 
 flog = open('data/residual', 'ab')
 
@@ -57,12 +57,18 @@ v_x = g.ug[:, 1:]
 v_y = g.vg[1:, :]
 p_g = g.pg[1:, 1:]
 
-xp = np.linspace(0, g.l_lid, g.ngx)
-yp = np.linspace(0, g.l_lid, g.ngy)
+xp = np.linspace(0.0, g.l_lid, g.ngx)
+yp = np.linspace(0.0, g.l_lid, g.ngy)
 xpos, ypos = np.meshgrid(xp, yp)
 
-np.savetxt('data/Central_U', np.c_[g.phi_midx(v_x), yp], fmt='%.8f')
-np.savetxt('data/Central_V', np.c_[g.phi_midy(v_y), xp], fmt='%.8f')
+v_mid = 0.5 * np.sum(v_y[:,
+                         np.int(v_x.shape[1] / 2) - 1:
+                         np.int(v_x.shape[1] / 2) + 1], axis=1)
+u_mid = 0.5 * np.sum(v_x[np.int(v_y.shape[0] / 2) - 1:
+                         np.int(v_y.shape[0] / 2) + 1, :], axis=0)
+
+np.savetxt('data/Central_U', np.c_[u_mid, yp], fmt='%.8f')
+np.savetxt('data/Central_V', np.c_[v_mid, xp], fmt='%.8f')
 np.savetxt('data/xyuvp', np.c_[xpos.reshape(-1), ypos.reshape(-1),
                                v_x.reshape(-1), v_y.reshape(-1),
                                p_g.reshape(-1)], fmt='%.8f')
