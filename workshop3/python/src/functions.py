@@ -3,7 +3,6 @@ import numpy as np
 
 class Grid2D(object):
     def __init__(self, ngx, ngy, l_lid):
-
         self.l_lid = l_lid
         self.ngx = ngx
         self.ngy = ngy

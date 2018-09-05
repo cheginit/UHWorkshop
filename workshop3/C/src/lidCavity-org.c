@@ -26,6 +26,8 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
                              ---------------
                                   u=0, v=0
 \*============================================================================*/
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "functions.h"
 
@@ -35,23 +37,23 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
 
 /* Define a max function */
 #ifndef max
-#define max(a,b) \
-  ({ __auto_type _a = (a); \
-     __auto_type _b = (b); \
-     _a > _b ? _a : _b; })
+#   define max(a,b) \
+           ({ __auto_type _a = (a); \
+               __auto_type _b = (b); \
+             _a > _b ? _a : _b; })
 #endif
 
 /* Define a function to check if a variable is NAN */
 #ifndef isnan
-#define isnan(x) x != x
+#   define isnan(x) x != x
 #endif
 
 /* Main program */
 int main (int argc, char *argv[])
 {
-  double **ubufo, **ubufn, **ubufg, **ubufc, **u, **un, **ug, **uc, **utmp;
-  double **vbufo, **vbufn, **vbufg, **vbufc, **v, **vn, **vg, **vc,**vtmp;
-  double **pbufo, **pbufn, **p, **pn, **ptmp;
+  double **ubufo, **ubufn, **u, **un, **ug, **utmp;
+  double **vbufo, **vbufn, **v, **vn, **vg, **vtmp;
+  double **pbufo, **pbufn, **p, **pn, **pg, **ptmp;
 
   double dx, dy, dt, Re, nu;
   double dtdx, dtdy, dtdxx, dtdyy, dtdxdy;
@@ -65,17 +67,11 @@ int main (int argc, char *argv[])
   const int xlo = 1, xhi = IX - 1, xtot = IX + 1, xm = IX/2;
   const int ylo = 1, yhi = IY - 1, ytot = IY + 1, ym = IY/2;
 
-  /* Define arrays for min and max bounds for slicing arrays */
-  const int ru[2][4] = {{xlo, IX, 0, ytot - 1},
-                        {0, IX, ylo, ytot - 1}};
-  const int rv[2][4] = {{xlo, xtot - 1, 0, IY},
-                        {0, xtot - 1, ylo, IY}};
-
   /* Simulation parameters */
   /* Best for Re = 100 */
-  /* const double cfl = 0.15, c2 = 5.0; */
+  const double cfl = 0.15, c2 = 5.0;
   /* Best for Re = 1000*/
-  const double cfl = 0.20, c2 = 5.8;
+  /* const double cfl = 0.20, c2 = 5.8; */
   /* Best for Re = 3200*/
   /* const double cfl = 0.05, c2 = 5.8; */
   const double tol = 1.0e-8, l_lid = 1.0, gradp = 0.0;
@@ -120,15 +116,6 @@ int main (int argc, char *argv[])
   u = ubufo;
   un = ubufn;
 
-  /* Generate two 2D arrays for storing grid and center velocity field
-     in x-direction */
-  ubufg = array_2d(IX, ytot);
-  ubufc = array_2d(IX, ytot);
-  /* Define two pointers to the generated buffers for velocity field
-     in x-direction */
-  ug = ubufg;
-  uc = ubufc;
-
   /* Generate two 2D arrays for storing old and new velocity field
      in y-direction */
   vbufo = array_2d(xtot, IY);
@@ -137,15 +124,6 @@ int main (int argc, char *argv[])
      in y-direction */
   v = vbufo;
   vn = vbufn;
-
-  /* Generate two 2D arrays for storing grid and center velocity field
-     in x-direction */
-  vbufg = array_2d(xtot, IY);
-  vbufc = array_2d(xtot, IY);
-  /* Define two pointers to the generated buffers for velocity field
-     in x-direction */
-  vg = vbufg;
-  vc = vbufc;
 
   /* Generate two 2D arrays for storing old and new pressure field*/
   pbufo = array_2d(xtot, ytot);
@@ -191,23 +169,19 @@ int main (int argc, char *argv[])
     p[xtot - 1][j] = p[xtot - 2][j] - dx * gradp;
   }
 
+
   /* Start the main loop */
   do {
-    phi_gc(u, uc, ug, ru);
-    phi_gc(v, vg, vc, rv);
-
     /* Solve x-momentum equation for computing u */
     #pragma omp parallel for private(i,j) schedule(auto)
     for (i = xlo; i < xhi; i++) {
       for (j = ylo; j < ytot - 1; j++) {
         un[i][j] = u[i][j]
-                   - dtdx * (uc[i+1][j] * uc[i+1][j]
-                             - uc[i][j] * uc[i][j])
-                   - dtdy * (ug[i][j+1] * vg[i+1][j]
-                             - ug[i][j] * vg[i+1][j-1])
+                   - dtdx * (pow(avx(u, i+1, j), 2) - pow(avx(u, i, j), 2))
+                   - dtdy * (avy(u, i, j+1) * avx(v, i+1, j)
+                            - avy(u, i, j) * avx(v, i+1, j-1))
                    - dtdx * (p[i+1][j] - p[i][j])
-                   + nu * (dtdxx * (u[i+1][j] - 2.0 * u[i][j] + u[i-1][j])
-                           + dtdyy * (u[i][j+1] - 2.0 * u[i][j] + u[i][j-1]));
+                   + nu * div2(u, i, j, dtdxx, dtdyy);
       }
     }
 
@@ -216,13 +190,11 @@ int main (int argc, char *argv[])
     for (i = xlo; i < xtot - 1; i++) {
       for (j = ylo; j < yhi; j++) {
         vn[i][j] = v[i][j]
-                   - dtdx * (ug[i][j+1] * vg[i+1][j]
-                             - ug[i-1][j+1] * vg[i][j])
-                   - dtdy * (vc[i][j+1] * vc[i][j+1]
-                             - vc[i][j] * vc[i][j])
+                   - dtdx * (avy(u, i, j+1) * avx(v, i+1, j)
+                            - avy(u, i-1, j+1) * avx(v, i, j))
+                   - dtdy * (pow(avy(v, i, j+1), 2) - pow(avy(v, i, j), 2))
                    - dtdy * (p[i][j+1] - p[i][j])
-                   + nu * (dtdxx * (v[i+1][j] - 2.0 * v[i][j] + v[i-1][j])
-                           + dtdyy * (v[i][j+1] - 2.0 * v[i][j] + v[i][j-1]));
+                   + nu * div2(v, i, j, dtdxx, dtdyy);
       }
     }
 
@@ -296,19 +268,11 @@ int main (int argc, char *argv[])
       free(ubufo);
       free(*ubufn);
       free(ubufn);
-      free(*ubufg);
-      free(ubufg);
-      free(*ubufc);
-      free(ubufc);
 
       free(*vbufo);
       free(vbufo);
       free(*vbufn);
       free(vbufn);
-      free(*vbufg);
-      free(vbufg);
-      free(*vbufc);
-      free(vbufc);
 
       free(*pbufo);
       free(pbufo);
@@ -346,19 +310,11 @@ int main (int argc, char *argv[])
     free(ubufo);
     free(*ubufn);
     free(ubufn);
-    free(*ubufg);
-    free(ubufg);
-    free(*ubufc);
-    free(ubufc);
 
     free(*vbufo);
     free(vbufo);
     free(*vbufn);
     free(vbufn);
-    free(*vbufg);
-    free(vbufg);
-    free(*vbufc);
-    free(vbufc);
 
     free(*pbufo);
     free(pbufo);
@@ -373,17 +329,16 @@ int main (int argc, char *argv[])
 
   /* Computing new arrays for computing the fields along lines crossing
      the center of the domain in x- and y-directions */
-  double **u_g, **v_g, **p_g;
-  v_g = array_2d(IX, IY);
-  u_g = array_2d(IX, IY);
-  p_g = array_2d(IX, IY);
+  vg = array_2d(IX, IY);
+  ug = array_2d(IX, IY);
+  pg = array_2d(IX, IY);
 
   #pragma omp parallel for private(i,j) schedule(auto)
   for (i = 0; i < IX; i++) {
    for (j = 0; j < IY; j++) {
-     u_g[i][j] = 0.5 * (u[i][j+1] + u[i][j]);
-     v_g[i][j] = 0.5 * (v[i+1][j] + v[i][j]);
-     p_g[i][j] = 0.25 * (p[i][j] + p[i + 1][j] + p[i][j + 1] + p[i + 1][j + 1]);
+     ug[i][j] = avy(u, i, j + 1);
+     vg[i][j] = avx(v, i + 1, j);
+     pg[i][j] = 0.25 * (p[i][j] + p[i + 1][j] + p[i][j + 1] + p[i + 1][j + 1]);
    }
   }
 
@@ -392,19 +347,11 @@ int main (int argc, char *argv[])
   free(ubufo);
   free(*ubufn);
   free(ubufn);
-  free(*ubufg);
-  free(ubufg);
-  free(*ubufc);
-  free(ubufc);
 
   free(*vbufo);
   free(vbufo);
   free(*vbufn);
   free(vbufn);
-  free(*vbufg);
-  free(vbufg);
-  free(*vbufc);
-  free(vbufc);
 
   free(*pbufo);
   free(pbufo);
@@ -419,7 +366,7 @@ int main (int argc, char *argv[])
   fprintf(fug, "# U, Y\n");
 
   for (j = 0; j < IY; j++) {
-    fprintf(fug, "%.8lf \t %.8lf\n", 0.5 * (u_g[xm][j] + u_g[xm + 1][j]),
+    fprintf(fug, "%.8lf \t %.8lf\n", 0.5 * (ug[xm][j] + ug[xm + 1][j]),
             (double) j*dy );
   }
 
@@ -430,7 +377,7 @@ int main (int argc, char *argv[])
   fprintf(fug, "# V, X\n");
 
   for (i = 0; i < IX; i++) {
-    fprintf(fvg, "%.8lf \t %.8lf\n", 0.5 * (v_g[i][ym] + v_g[i][ym + 1]),
+    fprintf(fvg, "%.8lf \t %.8lf\n", 0.5 * (vg[i][ym] + vg[i][ym + 1]),
             (double) i*dx );
   }
 
@@ -442,21 +389,21 @@ int main (int argc, char *argv[])
   for (i = 0; i < IX; i++) {
     for (j = 0; j < IY; j++) {
        fprintf(fd, "%.8lf \t %.8lf \t %.8lf \t %.8lf \t %.8lf\n",
-               (double) i*dx, (double) j*dy, u_g[i][j], v_g[i][j], p_g[i][j]);
+               (double) i*dx, (double) j*dy, ug[i][j], vg[i][j], pg[i][j]);
     }
   }
 
   fclose(fd);
 
   /* Free the memory */
-  free(*u_g);
-  free(u_g);
+  free(*ug);
+  free(ug);
 
-  free(*v_g);
-  free(v_g);
+  free(*vg);
+  free(vg);
 
-  free(*p_g);
-  free(p_g);
+  free(*pg);
+  free(pg);
 
   return 0;
 }
