@@ -26,8 +26,8 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
                              ---------------
                                   u=0, v=0
 \*============================================================================*/
-#include <math.h>
 #include "functions.h"
+#include <math.h>
 
 /* Specify number of grid points in x and y directions */
 #define IX 128
@@ -49,6 +49,9 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
 /* Main program */
 int main (int argc, char *argv[])
 {
+  /* 4 arrays are required for velocity fields and two for pressure.
+   * Velocity: old, new, grid points, cell centers
+   * Pressure: old and new */
   double **ubufo, **ubufn, **ubufg, **ubufc, **u, **un, **ug, **uc, **utmp;
   double **vbufo, **vbufn, **vbufg, **vbufc, **v, **vn, **vg, **vc,**vtmp;
   double **pbufo, **pbufn, **p, **pn, **ptmp;
@@ -61,11 +64,14 @@ int main (int argc, char *argv[])
   double vt, vb, vl, vr;
   double err_tot, err_u, err_v, err_p, err_d;
 
-  /* Define first and last interior nodes number for easier iteration */
+  /* Define first and last interior nodes number for better
+   * code readability*/
   const int xlo = 1, xhi = IX - 1, xtot = IX + 1, xm = IX/2;
   const int ylo = 1, yhi = IY - 1, ytot = IY + 1, ym = IY/2;
 
-  /* Define arrays for min and max bounds for slicing arrays */
+  /* Define arrays for min and max bounds for slicing arrays.
+   * First row are bounds for averaging in x direction and second
+   * row for averaging i y direction. */
   const int ru[2][4] = {{xlo, IX, 0, ytot - 1},
                         {0, IX, ylo, ytot - 1}};
   const int rv[2][4] = {{xlo, xtot - 1, 0, IY},
@@ -112,38 +118,38 @@ int main (int argc, char *argv[])
   dtdxdy = dt * dx * dy;
 
   /* Generate two 2D arrays for storing old and new velocity field
-     in x-direction */
+   * in x-direction */
   ubufo = array_2d(IX, ytot);
   ubufn = array_2d(IX, ytot);
   /* Define two pointers to the generated buffers for velocity field
-     in x-direction */
+   * in x-direction */
   u = ubufo;
   un = ubufn;
 
   /* Generate two 2D arrays for storing grid and center velocity field
-     in x-direction */
+   * in x-direction */
   ubufg = array_2d(IX, ytot);
   ubufc = array_2d(IX, ytot);
   /* Define two pointers to the generated buffers for velocity field
-     in x-direction */
+   * in x-direction */
   ug = ubufg;
   uc = ubufc;
 
   /* Generate two 2D arrays for storing old and new velocity field
-     in y-direction */
+   * in y-direction */
   vbufo = array_2d(xtot, IY);
   vbufn = array_2d(xtot, IY);
   /* Define two pointers to the generated buffers for velocity field
-     in y-direction */
+   * in y-direction */
   v = vbufo;
   vn = vbufn;
 
   /* Generate two 2D arrays for storing grid and center velocity field
-     in x-direction */
+   * in y-direction */
   vbufg = array_2d(xtot, IY);
   vbufc = array_2d(xtot, IY);
   /* Define two pointers to the generated buffers for velocity field
-     in x-direction */
+   * in y-direction */
   vg = vbufg;
   vc = vbufc;
 
@@ -161,7 +167,7 @@ int main (int argc, char *argv[])
   }
 
   /* Applying boundary conditions */
-  /* Dirichlet boundary conditions */
+  /* Dirichlet boundary condition */
   for (i = xlo; i < xhi; i++) {
     u[i][0] = ub - u[i][1];
     u[i][ytot - 1] = 2.0*ut - u[i][ytot - 2];
@@ -171,7 +177,7 @@ int main (int argc, char *argv[])
     u[xhi][j] = ur;
   }
 
-  /* Dirichlet boundary conditions */
+  /* Dirichlet boundary condition */
   for (i = xlo; i < xtot - 1; i++) {
     v[i][0] = vb;
     v[i][yhi] = vt;
@@ -181,7 +187,7 @@ int main (int argc, char *argv[])
     v[xtot - 1][j] = vr - v[xtot - 2][j];
   }
 
-  /* Neumann boundary conditions */
+  /* Neumann boundary condition */
   for (i = xlo; i < xtot - 1; i++) {
     p[i][0] = p[i][1] - dy * gradp;
     p[i][ytot - 1] = p[i][ytot - 2]  - dy * gradp;

@@ -32,6 +32,7 @@ class Grid2D(object):
                    'v': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
                    'p': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0}}
 
+    # Compute velocity field on grid points and cell centers
     def phi_g(self):
         self.ug[:, self.ylo:] = 0.5 * (self.u[:, self.ylo:]
                                        + self.u[:, self.ylo - 1:-1])
@@ -44,6 +45,7 @@ class Grid2D(object):
         self.vc[:, self.ylo:] = 0.5 * (self.v[:, self.ylo:]
                                        + self.v[:, self.ylo - 1:-1])
 
+    # Compute pressure field on grid points
     def p_g(self):
         self.pg[self.xlo:, self.ylo:] = 0.25 \
             * (self.p[self.xlo - 1:-1, self.ylo:]
@@ -51,6 +53,7 @@ class Grid2D(object):
                + self.p[self.xlo:, self.ylo - 1:-1]
                + self.p[self.xlo:, self.ylo:])
 
+    # Dirichlet BC for velocity field
     def BC_u(self):
         self.u[self.xlo:self.xhi, 0] = \
             self.BC['u']['b'] - self.u[self.xlo:self.xhi, 1]
@@ -67,6 +70,7 @@ class Grid2D(object):
         self.v[self.xtot - 1, :self.ngy] = \
             self.BC['v']['r'] - self.v[self.xtot - 2, :self.ngy]
 
+    # Neumann BC for pressure field
     def BC_p(self):
         self.p[self.xlo:self.xtot - 1, 0] = \
             self.p[self.xlo:self.xtot - 1, 1] - self.dy * self.BC['p']['b']
@@ -95,6 +99,7 @@ class Simulation(object):
         grid.BC_v()
         grid.BC_p()
 
+    # Shift a given range slice to left, right, top and bottom by one
     def slice(self, xl, xh, yl, yh):
         self.s_in = np.s_[xl:xh, yl:yh]
         self.s_xr = np.s_[xl + 1:xh + 1]
@@ -176,6 +181,7 @@ class Simulation(object):
         pn[s_in] = g.p[s_in] - self.c2 * cn_err[s_in]
         return pn, dxy * np.sum(cn_err)
 
+    # Compute L2-norm based on new and pold time steps data
     def l2norm(self, phi_n, phi_o):
         dtxy = self.dt * self.grid.dx * self.grid.dy
         return np.sqrt(dtxy * np.sum((phi_n - phi_o)**2))
