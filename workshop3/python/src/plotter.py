@@ -11,6 +11,7 @@ files = {'uvp': "data/xyuvp", 'uc': "data/Central_U", 'vc': "data/Central_V",
 
 data = {k: np.loadtxt(f, dtype=np.float64) for k, f in files.items()}
 
+# Plot v component  of velocit at the middle of the domain along the x-dir
 fig, ax = newfig(0.7)
 ax.plot(data['uc'][:, 0], data['uc'][:, 1],
         label="Numerical", linewidth=0.6)
@@ -27,6 +28,7 @@ savepgf("uvelocity")
 
 plt.clf()
 
+# Plot v component  of velocit at the middle of the domain along the x-dir
 fig, ax = newfig(0.7)
 ax.plot(data['vc'][:, 1], data['vc'][:, 0],
         label="Numerical", linewidth=0.6)
@@ -43,6 +45,7 @@ savepgf("vvelocity")
 
 plt.clf()
 
+# Extract fields data from input including X, Y, u, v and p
 x = np.unique(data['uvp'][:, 0])
 y = np.unique(data['uvp'][:, 1])
 
@@ -52,6 +55,7 @@ vel = np.sqrt(u * u + v * v)
 
 X, Y = np.meshgrid(x, y)
 
+# Plot velocity contours
 fig, ax = newfig(0.7)
 levels = np.arange(0, 1, 0.1)
 cs = ax.contour(X, Y, vel, levels=levels)
@@ -66,6 +70,7 @@ savepgf("vel_contour")
 
 plt.clf()
 
+# Plot pressure contours
 fig, ax = newfig(0.7)
 levels = np.arange(np.amin(p), np.amax(p), 0.05)
 cs = ax.contour(X, Y, p, levels=levels)
@@ -80,6 +85,7 @@ savepgf("p_contour")
 
 plt.clf()
 
+# Plot velocity vector field
 skip = (slice(None, None, 5), slice(None, None, 5))
 fig, ax = newfig(0.7)
 ax.quiver(X[skip], Y[skip], u[skip], v[skip], vel[skip])

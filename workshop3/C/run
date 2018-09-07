@@ -17,18 +17,6 @@ error() {
     exit 1
 }
 
-log()
-{
-  local pid=$!
-  sleep 1
-  gnuplot src/log.plt & local pidg=$!
-  while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-    sleep 1
-  done
-  kill -9 $pidg
-  wait $pidg 2>/dev/null
-}
-
 setRe() {
 re="$1"
 case $re in
@@ -90,7 +78,7 @@ make
 cd ..
 
 rm -f data/Central* data/residual output/*.pdf
-$(which time) -f "Elapsed=%E" bin/lidCavity $re #& log
+$(which time) -f "Elapsed=%E" bin/lidCavity $re
 
 [ "$?" -eq "0" ] \
 && echo "Plotting the results" \
