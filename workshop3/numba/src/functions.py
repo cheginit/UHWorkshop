@@ -1,4 +1,5 @@
 import numpy as np
+from numba import njit, stencil
 
 
 class Grid2D(object):
@@ -31,27 +32,6 @@ class Grid2D(object):
         self.BC = {'u': {'t': 1.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
                    'v': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
                    'p': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0}}
-
-    # Compute velocity field on grid points and cell centers
-    def phi_g(self):
-        self.ug[:, self.ylo:] = 0.5 * (self.u[:, self.ylo:]
-                                       + self.u[:, self.ylo - 1:-1])
-        self.vg[self.xlo:, :] = 0.5 * (self.v[self.xlo:, :]
-                                       + self.v[self.xlo - 1:-1, :])
-
-    def phi_c(self):
-        self.uc[self.xlo:, :] = 0.5 * (self.u[self.xlo:, :]
-                                       + self.u[self.xlo - 1:-1, :])
-        self.vc[:, self.ylo:] = 0.5 * (self.v[:, self.ylo:]
-                                       + self.v[:, self.ylo - 1:-1])
-
-    # Compute pressure field on grid points
-    def p_g(self):
-        self.pg[self.xlo:, self.ylo:] = 0.25 \
-            * (self.p[self.xlo - 1:-1, self.ylo:]
-               + self.p[self.xlo - 1:-1, self.ylo - 1:-1]
-               + self.p[self.xlo:, self.ylo - 1:-1]
-               + self.p[self.xlo:, self.ylo:])
 
     # Dirichlet BC for velocity field
     def BC_u(self):
@@ -112,77 +92,88 @@ class Simulation(object):
         g.u[g.xlo:g.xhi, g.ytot - 1] = g.BC['u']['t']
         g.u[g.xlo:g.xhi, g.ytot - 2] = g.BC['u']['t']
 
-    # @profile
-    def momentum(self):
-        g = self.grid
-        dtdx = self.dt / g.dx
-        dtdxx = self.dt / (g.dx * g.dx)
-        dtdy = self.dt / g.dy
-        dtdyy = self.dt / (g.dy * g.dy)
-
-        self.slice(g.xlo, g.xhi, g.ylo, g.ytot - 1)
-        s_in = self.s_in
-        s_xr = self.s_xr
-        s_xl = self.s_xl
-        s_yt = self.s_yt
-        s_yb = self.s_yb
-
-        un = g.u.copy()
-        un[s_in] = g.u[s_in] \
-            - dtdx * (g.uc[s_xr, s_in[1]] * g.uc[s_xr, s_in[1]]
-                      - g.uc[s_in] * g.uc[s_in]) \
-            - dtdy * (g.ug[s_in[0], s_yt] * g.vg[s_xr, s_in[1]]
-                      - g.ug[s_in] * g.vg[s_xr, s_yb]) \
-            - dtdx * (g.p[s_xr, s_in[1]] - g.p[s_in]) \
-            + self.nu * (dtdxx
-                         * (g.u[s_xl, s_in[1]] - 2 * g.u[s_in]
-                            + g.u[s_xr, s_in[1]])
-                         + dtdyy
-                         * (g.u[s_in[0], s_yb] - 2 * g.u[s_in]
-                            + g.u[s_in[0], s_yt]))
-
-        self.slice(g.xlo, g.xtot - 1, g.ylo, g.yhi)
-        s_in = self.s_in
-        s_xr = self.s_xr
-        s_xl = self.s_xl
-        s_yt = self.s_yt
-        s_yb = self.s_yb
-
-        vn = g.v.copy()
-        vn[s_in] = g.v[s_in] \
-            - dtdx * (g.ug[s_in[0], s_yt] * g.vg[s_xr, s_in[1]]
-                      - g.ug[s_xl, s_yt] * g.vg[s_in]) \
-            - dtdy * (g.vc[s_in[0], s_yt] * g.vc[s_in[0], s_yt]
-                      - g.vc[s_in] * g.vc[s_in]) \
-            - dtdy * (g.p[s_in[0], s_yt] - g.p[s_in]) \
-            + self.nu * (dtdxx
-                         * (g.v[s_xl, s_in[1]] - 2 * g.v[s_in]
-                            + g.v[s_xr, s_in[1]])
-                         + dtdyy
-                         * (g.v[s_in[0], s_yb] - 2 * g.v[s_in]
-                            + g.v[s_in[0], s_yt]))
-        return un, vn
-
-    def continuity(self):
-        g = self.grid
-        dtdx = self.dt / g.dx
-        dtdy = self.dt / g.dy
-
-        self.slice(g.xlo, g.xtot - 1, g.ylo, g.ytot - 1)
-        s_in = self.s_in
-        s_xl = self.s_xl
-        s_yb = self.s_yb
-        dxy = self.grid.dx * self.grid.dy
-
-        cn_err = np.zeros_like(g.p)
-        cn_err[s_in] = dtdx * (g.u[s_in] - g.u[s_xl, s_in[1]]) \
-            + dtdy * (g.v[s_in] - g.v[s_in[0], s_yb])
-
-        pn = g.p.copy()
-        pn[s_in] = g.p[s_in] - self.c2 * cn_err[s_in]
-        return pn, dxy * np.sum(cn_err)
-
     # Compute L2-norm based on new and pold time steps data
     def l2norm(self, phi_n, phi_o):
         dtxy = self.dt * self.grid.dx * self.grid.dy
         return np.sqrt(dtxy * np.sum((phi_n - phi_o)**2))
+
+
+@stencil
+def ave_x(arr):
+    return 0.5 * (arr[-1, 0] + arr[0, 0])
+
+
+@stencil
+def ave_y(arr):
+    return 0.5 * (arr[0, -1] + arr[0, 0])
+
+
+@stencil
+def ave_xy(arr):
+    return 0.25 * (arr[0, 0] + arr[0, -1] + arr[-1, 0] + arr[-1, -1])
+
+
+@njit(parallel=True)
+def momentum(uo, vo, po, dt, dx, dy, nu):
+    un = uo.copy()
+    vn = vo.copy()
+
+    dtdx = dt / dx
+    dtdy = dt / dy
+    dtdxx = dt / (dx * dx)
+    dtdyy = dt / (dy * dy)
+
+    ug = ave_y(uo)
+    uc = ave_x(uo)
+    vg = ave_x(vo)
+    vc = ave_y(vo)
+
+    for i in range(1, uo.shape[0] - 1):
+        for j in range(1, uo.shape[1] - 1):
+            un[i, j] = uo[i, j] \
+                - dtdx * (uc[i + 1, j] * uc[i + 1, j]
+                          - uc[i, j] * uc[i, j]) \
+                - dtdy * (ug[i, j + 1] * vg[i + 1, j]
+                          - ug[i, j] * vg[i + 1, j - 1]) \
+                - dtdx * (po[i + 1, j] - po[i, j]) \
+                + nu * (dtdxx
+                        * (uo[i - 1, j] - 2 * uo[i, j]
+                           + uo[i + 1, j])
+                        + dtdyy
+                        * (uo[i, j - 1] - 2 * uo[i, j]
+                           + uo[i, j + 1]))
+
+    for i in range(1, vo.shape[0] - 1):
+        for j in range(1, vo.shape[1] - 1):
+            vn[i, j] = vo[i, j] \
+                - dtdx * (ug[i, j + 1] * vg[i + 1, j]
+                          - ug[i - 1, j + 1] * vg[i, j]) \
+                - dtdy * (vc[i, j + 1] * vc[i, j + 1]
+                          - vc[i, j] * vc[i, j]) \
+                - dtdy * (po[i, j + 1] - po[i, j]) \
+                + nu * (dtdxx
+                        * (vo[i - 1, j] - 2 * vo[i, j]
+                           + vo[i + 1, j])
+                        + dtdyy
+                        * (vo[i, j - 1] - 2 * vo[i, j]
+                           + vo[i, j + 1]))
+    return un, vn
+
+
+@njit(parallel=True)
+def continuity(uo, vo, po, dt, dx, dy, c2):
+    dtdx = dt / dx
+    dtdy = dt / dy
+
+    dxy = dx * dy
+
+    cn_err = np.zeros_like(po)
+    pn = po.copy()
+
+    for i in range(1, vo.shape[0] - 1):
+        for j in range(1, uo.shape[1] - 1):
+            cn_err[i, j] = dtdx * (uo[i, j] - uo[i - 1, j]) \
+                + dtdy * (vo[i, j] - vo[i, j - 1])
+            pn[i, j] = po[i, j] - c2 * cn_err[i, j]
+
+    return pn, dxy * np.sum(cn_err)
