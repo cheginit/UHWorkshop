@@ -28,6 +28,7 @@ class Grid2D(object):
         self.uc = np.zeros_like(self.u)
         self.vc = np.zeros_like(self.v)
 
+        # Set of boundary conditions
         self.BC = {'u': {'t': 1.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
                    'v': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
                    'p': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0}}
@@ -94,6 +95,8 @@ class Simulation(object):
         self.tol = tol
         self.itr_max = itr_max
 
+        self.dtxy = self.dt * grid.dx * grid.dy
+
         self.init_cond()
         grid.BC_u()
         grid.BC_v()
@@ -107,6 +110,7 @@ class Simulation(object):
         self.s_yt = np.s_[yl + 1:yh + 1]
         self.s_yb = np.s_[yl - 1:yh - 1]
 
+    # Impose initial condition
     def init_cond(self):
         g = self.grid
         g.u[g.xlo:g.xhi, g.ytot - 1] = g.BC['u']['t']
@@ -184,5 +188,4 @@ class Simulation(object):
 
     # Compute L2-norm based on new and pold time steps data
     def l2norm(self, phi_n, phi_o):
-        dtxy = self.dt * self.grid.dx * self.grid.dy
-        return np.sqrt(dtxy * np.sum((phi_n - phi_o)**2))
+        return np.sqrt(self.dtxy * np.sum((phi_n - phi_o)**2))

@@ -77,14 +77,10 @@ int main (int argc, char *argv[])
   const int rv[2][4] = {{xlo, xtot - 1, 0, IY},
                         {0, xtot - 1, ylo, IY}};
 
-  /* Simulation parameters */
-  /* Best for Re = 100 */
-  /* const double cfl = 0.15, c2 = 5.0; */
-  /* Best for Re = 1000*/
-  const double cfl = 0.20, c2 = 5.8;
-  /* Best for Re = 3200*/
-  /* const double cfl = 0.05, c2 = 5.8; */
   const double tol = 1.0e-8, l_lid = 1.0, gradp = 0.0;
+
+  /* Simulation parameters */
+  double cfl , c2;
 
   /* Getting Reynolds number */
   if(argc <= 1) {
@@ -94,6 +90,17 @@ int main (int argc, char *argv[])
     Re = strtod(argv[1], &ptr);
   }
   printf("Re number is set to %d\n", (int) Re);
+
+  if (Re < 500) {
+      cfl = 0.15;
+      c2 = 5.0;
+  } else if (Re < 2000) {
+      cfl = 0.20;
+      c2 = 5.8;
+  } else {
+      cfl = 0.05;
+      c2 = 5.8;
+  }
 
   /* Boundary condition values */
   ut = 1.0;

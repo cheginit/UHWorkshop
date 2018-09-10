@@ -29,6 +29,7 @@ class Grid2D(object):
         self.uc = np.zeros_like(self.u)
         self.vc = np.zeros_like(self.v)
 
+        # Set of boundary conditions
         self.BC = {'u': {'t': 1.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
                    'v': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
                    'p': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0}}
@@ -74,19 +75,14 @@ class Simulation(object):
         self.tol = tol
         self.itr_max = itr_max
 
+        self.dtxy = self.dt * grid.dx * grid.dy
+
         self.init_cond()
         grid.BC_u()
         grid.BC_v()
         grid.BC_p()
 
-    # Shift a given range slice to left, right, top and bottom by one
-    def slice(self, xl, xh, yl, yh):
-        self.s_in = np.s_[xl:xh, yl:yh]
-        self.s_xr = np.s_[xl + 1:xh + 1]
-        self.s_xl = np.s_[xl - 1:xh - 1]
-        self.s_yt = np.s_[yl + 1:yh + 1]
-        self.s_yb = np.s_[yl - 1:yh - 1]
-
+    # Impose initial condition
     def init_cond(self):
         g = self.grid
         g.u[g.xlo:g.xhi, g.ytot - 1] = g.BC['u']['t']
@@ -94,8 +90,7 @@ class Simulation(object):
 
     # Compute L2-norm based on new and pold time steps data
     def l2norm(self, phi_n, phi_o):
-        dtxy = self.dt * self.grid.dx * self.grid.dy
-        return np.sqrt(dtxy * np.sum((phi_n - phi_o)**2))
+        return np.sqrt(self.dtxy * np.sum((phi_n - phi_o)**2))
 
 
 @stencil
@@ -131,32 +126,20 @@ def momentum(uo, vo, po, dt, dx, dy, nu):
     for i in range(1, uo.shape[0] - 1):
         for j in range(1, uo.shape[1] - 1):
             un[i, j] = uo[i, j] \
-                - dtdx * (uc[i + 1, j] * uc[i + 1, j]
-                          - uc[i, j] * uc[i, j]) \
-                - dtdy * (ug[i, j + 1] * vg[i + 1, j]
-                          - ug[i, j] * vg[i + 1, j - 1]) \
-                - dtdx * (po[i + 1, j] - po[i, j]) \
-                + nu * (dtdxx
-                        * (uo[i - 1, j] - 2 * uo[i, j]
-                           + uo[i + 1, j])
-                        + dtdyy
-                        * (uo[i, j - 1] - 2 * uo[i, j]
-                           + uo[i, j + 1]))
+                - dtdx * (uc[i+1, j] * uc[i+1, j] - uc[i, j] * uc[i, j]) \
+                - dtdy * (ug[i, j+1] * vg[i+1, j] - ug[i, j] * vg[i+1, j-1]) \
+                - dtdx * (po[i+1, j] - po[i, j]) \
+                + nu * (dtdxx * (uo[i-1, j] - 2 * uo[i, j] + uo[i+1, j])
+                        + dtdyy * (uo[i, j-1] - 2 * uo[i, j] + uo[i, j+1]))
 
     for i in range(1, vo.shape[0] - 1):
         for j in range(1, vo.shape[1] - 1):
             vn[i, j] = vo[i, j] \
-                - dtdx * (ug[i, j + 1] * vg[i + 1, j]
-                          - ug[i - 1, j + 1] * vg[i, j]) \
-                - dtdy * (vc[i, j + 1] * vc[i, j + 1]
-                          - vc[i, j] * vc[i, j]) \
-                - dtdy * (po[i, j + 1] - po[i, j]) \
-                + nu * (dtdxx
-                        * (vo[i - 1, j] - 2 * vo[i, j]
-                           + vo[i + 1, j])
-                        + dtdyy
-                        * (vo[i, j - 1] - 2 * vo[i, j]
-                           + vo[i, j + 1]))
+                - dtdx * (ug[i, j+1] * vg[i+1, j] - ug[i-1, j+1] * vg[i, j]) \
+                - dtdy * (vc[i, j+1] * vc[i, j+1] - vc[i, j] * vc[i, j]) \
+                - dtdy * (po[i, j+1] - po[i, j]) \
+                + nu * (dtdxx * (vo[i-1, j] - 2 * vo[i, j] + vo[i+1, j])
+                        + dtdyy * (vo[i, j-1] - 2 * vo[i, j] + vo[i, j+1]))
     return un, vn
 
 
@@ -172,8 +155,8 @@ def continuity(uo, vo, po, dt, dx, dy, c2):
 
     for i in range(1, vo.shape[0] - 1):
         for j in range(1, uo.shape[1] - 1):
-            cn_err[i, j] = dtdx * (uo[i, j] - uo[i - 1, j]) \
-                + dtdy * (vo[i, j] - vo[i, j - 1])
+            cn_err[i, j] = dtdx * (uo[i, j] - uo[i-1, j]) \
+                + dtdy * (vo[i, j] - vo[i, j-1])
             pn[i, j] = po[i, j] - c2 * cn_err[i, j]
 
     return pn, dxy * np.sum(cn_err)

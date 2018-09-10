@@ -28,15 +28,17 @@
 # ========================================================================== #
 import numpy as np
 from sys import argv, exit
-from functions import Grid2D, Simulation
+import functions as fn
 
 
 Re = np.float64(argv[1]) if len(argv) == 2 else 100.0
 print("Re number is set to {:d}".format(int(Re)))
-g = Grid2D(128, 128, 1.0)
-# s = Simulation(g, cfl=0.15, c2=5.0, Re=Re)
-s = Simulation(g, cfl=0.20, c2=5.8, Re=Re)
+g = fn.Grid2D(128, 128, 1.0)
 
+if Re < 500:
+    s = fn.Simulation(g, cfl=0.15, c2=5.0, Re=Re)
+else:
+    s = fn.Simulation(g, cfl=0.20, c2=5.8, Re=Re)
 flog = open('data/residual', 'ab')
 
 itr = 1
