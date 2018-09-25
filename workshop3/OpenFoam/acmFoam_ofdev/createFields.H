@@ -26,15 +26,14 @@ volVectorField U
     mesh
 );
 
-Info<< "Reading artificial sound speed c2\n" << endl;
+#include "createPhi.H"
+
 dimensionedScalar c2
 (
     "c2",
     dimVelocity*dimVelocity,
     simple.dict().lookup("c2")
 );
-
-#include "createPhi.H"
 
 label pRefCell = 0;
 scalar pRefValue = 0.0;
@@ -50,3 +49,4 @@ autoPtr<incompressible::turbulenceModel> turbulence
 );
 
 #include "createMRF.H"
+#include "createFvOptions.H"

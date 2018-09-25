@@ -69,8 +69,6 @@ int main(int argc, char *argv[])
         laminarTransport.correct();
         turbulence->correct();
 
-        #include "continuityErrs.H"
-
         runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"

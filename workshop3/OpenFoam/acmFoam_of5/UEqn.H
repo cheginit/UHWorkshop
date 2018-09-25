@@ -1,4 +1,4 @@
-// Momentum solver
+// Momentum predictor
 
 MRF.correctBoundaryVelocity(U);
 
@@ -20,9 +20,4 @@ fvOptions.constrain(UEqn);
 
 solve(UEqn == -fvc::grad(p));
 
-U.correctBoundaryConditions();
 fvOptions.correct(U);
-
-adjustPhi(phi, U, p);
-
-tUEqn.clear();

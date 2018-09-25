@@ -19,24 +19,19 @@ gnuplot<<EOF
     set terminal pdf enhanced color
     set output "plots/uvelocity.pdf"
     set ylabel "y (m)"
-    set xlabel "U_x (m/s)"
-    set title  "Velocity fluctuations at the middle in x-dir. with Re=$re"
-    set grid
-    set key right bottom
-
-    plot "plots/vertical_U.xy" u 2:1 t "Numerical" w l, \
-         "plots/yu" u $col:1 w p ls 22 t "Ghia"
-EOF
-
-gnuplot<<EOF
-    set terminal pdf enhanced color
-    set output "plots/vvelocity.pdf"
     set xlabel "x (m)"
-    set ylabel "U_y (m/s)"
-    set title  "Velocity fluctuations at the middle in y-dir. with Re=$re"
+    set y2label "U_x (m)" tc lt 2
+    set x2label "U_y (m)"
+    set y2range [-0.5:0.5]
+    set x2range [-1:1]
+    set title  "Velocity fluctuations at the middle for Re=$re"
     set grid
-    set key top right
-
-    plot "plots/horizontal_U.xy" u 1:3 t "Numerical" w l, \
-         "plots/xv" u 1:$col w p ls 22 t "Ghia"
+    set key out top
+    set size square
+    
+    plot "plots/vertical_U.xy" u 2:1 t "Numerical, U_x" w l  axes x2y1, \
+         "plots/yu" u $col:1 w p ls 4 t "Ghia, U_x"  axes x2y1, \
+         "plots/horizontal_U.xy" u 1:3 t "Numerical, U_y" w l  axes x1y2, \
+         "plots/xv" u 1:$col w p ls 2 t "Ghia, U_y" axes x1y2
 EOF
+

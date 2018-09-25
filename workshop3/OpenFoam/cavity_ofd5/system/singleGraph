@@ -25,7 +25,7 @@ fields  (U);
 
 setConfig
 {
-    type    uniform;   // midPoint, midPointAndFace
+    type    uniform; //midPoint, midPointAndFace
     axis    distance;  // x, y, z, xyz
     nPoints $size;
 }

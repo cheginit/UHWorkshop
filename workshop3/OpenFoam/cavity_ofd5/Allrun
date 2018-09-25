@@ -8,8 +8,10 @@ application=$(getApplication)
 
 foamJob -w -a foamCleanTutorials
 foamJob -w -a blockMesh
+$(which time) -f "Elapsed=%E" foamJob -w -a $application
+
 #foamJob -w -a decomposePar
-$(which time) -f "Elapsed=%E" foamJob -w -a -p $application
+#$(which time) -f "Elapsed=%E" foamJob -w -a -p $application
 
 if [ "$?" -eq "0" ]; then
     iter=$(tac log | grep -m1 "SIMPLE" | grep -o "[0-9]*\.[0-9]*")
