@@ -160,3 +160,4 @@ def continuity(uo, vo, po, dt, dx, dy, c2):
             pn[i, j] = po[i, j] - c2 * cn_err[i, j]
 
     return pn, dxy * np.sum(cn_err)
+

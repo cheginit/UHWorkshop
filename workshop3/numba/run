@@ -57,10 +57,13 @@ do
 done
 
 [ -z "$re" ] && setRe 100
+[ ! -d output ] && mkdir output
 
-rm -f data/Central* data/residual output/*.pdf
+rm -f data/Central* data/residual
+
 $(which time) -f "Elapsed=%E" python src/lidCavity.py $re
 
 [ "$?" -eq "0" ] \
+&& rm -f output/*.pdf \
 && echo "Plotting the results" \
 && python src/plotter.py $re $col
