@@ -1,3 +1,0 @@
-acmFoam.C
-
-EXE = $(FOAM_USER_APPBIN)/acmFoam
