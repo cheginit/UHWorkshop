@@ -7,8 +7,8 @@ Workshop I and II are introductory workshops to OpenFOAM. The slides are [UHOF I
 
 Note that for calculating initial values of turbulence paramaters, [CFD-online Turbulence Calculator](https://www.cfd-online.com/Tools/turbulence.php) can be used.
 
-Moreover, there are two ways of working with Praveiew's python module:
-1. Use files in Paraview's intallation folder. A good way to use this method is to write a bash script and include these lines:
+Moreover, there are two ways of working with Praview's python module:
+1. (recommended) Use python libraries in the Paraview's intallation folder. A good way to use this method is to write a bash script for calling the python script and include these two lines:
 ```bash
 ...
 export PYTHONPATH="$PYTHONPATH:$WM_THIRD_PARTY_DIR/platforms/linux64Gcc/ParaView-5.5.2/lib:$WM_THIRD_PARTY_DIR/platforms/linux64Gcc/ParaView-5.5.2/lib/python2.7/site-packages"
@@ -16,7 +16,7 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$WM_THIRD_PARTY_DIR/platforms/linux64Gc
 ...
 python path/to/python/script
 ```
-Paraview version (5.5.2) should be adjusted according to the installed version.
+Note that, Paraview version (5.5.2) should be adjusted according to the installed version.
 
 2. Install a stand-alone paraview module from [conda-forge channel](https://anaconda.org/conda-forge/paraview). Keep in mind that you should always use the *builtin* flag of paraFoam when generating a python script (using the trace option) i.e, use ```paraFoam -builtin``` to run paraview. The module can be install as follows:
 
