@@ -1,4 +1,4 @@
-    phi =  fvc::flux(U);
+    phi = fvc::flux(U);
     MRF.makeRelative(phi);
     adjustPhi(phi, U, p);
 
