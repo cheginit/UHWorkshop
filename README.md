@@ -39,20 +39,17 @@ source ~/.bashrc
 # 5- Load Anaconda.
 ana2
 
-# 6- Create a new environment called "pypv" using conda-forge channel.
-conda create -n pypv -c conda-forge python=2
+# 6- Create a new environment called "pypv" using conda-forge channel and install the same version as the one installed with OpenFOAM.
+conda create -n pypv -c conda-forge paraview=5.5.2
 
 # 7- Load the newly created environment.
 source activate pypv
 
-# 8- Install paraview module from the channel.
-conda install -c conda-forge paraview
-
-# 9- Test the installation. If the installation was successful, the 
+# 8- Test the installation. If the installation was successful, the 
 # folowing command should not have any output.
 python -c "from paraview.simple import *"
 
-# 10- Deactivate the environment.
+# 9- Deactivate the environment.
 source deactivate
 ```
 Make sure to use the same version as the installed Paraview.
