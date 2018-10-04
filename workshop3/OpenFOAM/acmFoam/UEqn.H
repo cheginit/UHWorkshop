@@ -1,5 +1,3 @@
-    // Momentum predictor
-
     MRF.correctBoundaryVelocity(U);
 
     tmp<fvVectorMatrix> tUEqn

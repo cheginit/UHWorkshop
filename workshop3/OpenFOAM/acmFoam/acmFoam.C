@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    simpleFoam
+    acmFoam
 
 Description
-    Steady-state solver for incompressible, turbulent flow, using the SIMPLE
+    Steady-state solver for incompressible, turbulent flow, using the ACM
     algorithm.
 
 \*---------------------------------------------------------------------------*/
