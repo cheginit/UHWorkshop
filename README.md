@@ -65,4 +65,4 @@ This workshop provides an overview of available frameworks for developing CFD co
 3. Development with OpenFOAM: A simple implementation of ACM with Finite Volume method using OpenFOAM framework. It demonstrates advantages of using an already established CFD framework.
 4. Development with Fenics A simple implementation of ACM with Finite Element method using Fenics framework. It demonstrates advantages of using an already established CFD framework.
 
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/uvelocity.png" width="300">
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/uvelocity.pdf" width="300">
