@@ -16,38 +16,40 @@ files = {'uvp': "data/xyuvp", 'uc': "data/Central_U", 'vc': "data/Central_V",
 data = {k: np.loadtxt(f, dtype=np.float64) for k, f in files.items()}
 
 # =========================================================================== #
-# Plot v component  of velocit at the middle of the domain along the x-dir
-fig, ax = newfig(0.7)
-ax.plot(data['uc'][:, 0], data['uc'][:, 1],
-        label="Numerical", linewidth=0.6)
-ax.plot(data['ue'][:, rc], data['ue'][:, 0], 'x',
-        label="Experimental", linewidth=0.6)
-ax.grid(alpha=0.5)
-ax.tick_params(direction='out', top=False, right=False)
-ax.set_title("Velocity along the middle of $x$-axis at Re=" + re)
-ax.set_xlabel(r'$U$ (m s$^{-1}$)')
-ax.set_ylabel('$y$ (m)')
-ax.legend(loc="best")
-plt.tight_layout()
-savepgf("uvelocity")
+# Plot velocity at the middle of the domain along the x and y axes
+fig, ax_u = newfig(0.8)
+ax_v = ax_u.twiny().twinx()
 
-plt.clf()
+ax_u.plot(data['uc'][:, 0], data['uc'][:, 1], color= 'g',
+        label="Numerical, $U_x$", linewidth=0.6)
+ax_u.plot(data['ue'][:, rc], data['ue'][:, 0], '*', color= 'r',
+        label="Ghia, $U_x$", linewidth=0.6)
 
-# =========================================================================== #
-# Plot v component  of velocit at the middle of the domain along the x-dir
-fig, ax = newfig(0.7)
-ax.plot(data['vc'][:, 1], data['vc'][:, 0],
-        label="Numerical", linewidth=0.6)
-ax.plot(data['ve'][:, 0], data['ve'][:, rc], 'x',
-        label="Experimental", linewidth=0.6)
-ax.grid(alpha=0.5)
-ax.tick_params(direction='out', top=False, right=False)
-ax.set_title("Velocity along the middle of $y$-axis at Re=" + re)
-ax.set_xlabel('$x$ (m)')
-ax.set_ylabel(r'$V$ (m s$^{-1}$)')
-ax.legend(loc="best")
+ax_v.plot(data['vc'][:, 1], data['vc'][:, 0],
+        label="Numerical, $U_y$", linewidth=0.6)
+ax_v.plot(data['ve'][:, 0], data['ve'][:, rc], 'x',
+        label="Ghia, $U_y$", linewidth=0.6)
+
+ax_u.grid(alpha=0.5)
+ax_u.tick_params(direction='out', top=False, right=False)
+ax_u.set_title("Velocity profile along the middle of axes for Re=" + re)
+ax_v.set_xlabel('$x$ (m)')
+ax_v.set_ylabel('$U_y$ (m s$^{-1}$)')
+ax_u.set_ylabel('$y$ (m)')
+ax_u.set_xlabel('$U_x$ (m s$^{-1}$)')
+ax_u.legend(loc='center left', bbox_to_anchor=(1.2, 0.1))
+ax_v.legend(loc='center left', bbox_to_anchor=(1.2, 0.27))
+
+x0, x1 = ax_u.get_xlim()
+y0, y1 = ax_u.get_ylim()
+ax_u.set_aspect((x1-x0)/(y1-y0))
+
+x0, x1 = ax_v.get_xlim()
+y0, y1 = ax_v.get_ylim()
+ax_v.set_aspect((x1-x0)/(y1-y0))
+
 plt.tight_layout()
-savepgf("vvelocity")
+savepgf("velocity")
 
 plt.clf()
 
@@ -74,8 +76,8 @@ ax.set_aspect('equal')
 ax.set_xlim([X.min(), X.max()])
 ax.set_ylim([Y.min(), Y.max()])
 ax.tick_params(direction='out', top=False, right=False)
-ax.set_title("Velocity vector field")
+ax.set_title("Pressure contours and streamlines")
 ax.set_xlabel('$x$ (m)')
 ax.set_ylabel('$y$ (m)')
 plt.tight_layout()
-savepgf("U_field")
+savepgf("pressure_stream")
