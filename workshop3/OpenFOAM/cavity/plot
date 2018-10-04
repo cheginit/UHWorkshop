@@ -24,7 +24,7 @@ gnuplot<<EOF
     set x2label "U_y (m)"
     set y2range [-0.5:0.5]
     set x2range [-1:1]
-    set title  "Velocity fluctuations at the middle for Re=$re"
+    set title  "Velocity profile at the middle for Re=$re"
     set grid
     set key out top
     set size square
