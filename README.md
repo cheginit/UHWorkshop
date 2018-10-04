@@ -27,7 +27,7 @@ wget "https://repo.continuum.io/archive/Anaconda2-5.1.0-Linux-x86_64.sh"
 
 # 2- Install Anaconda. It is recommended not to add it to the PATH  
 # system permanently.
-bash Anaconda2-5.1.0-Linux-x86_64.sh
+bash Anaconda2-5.3.0-Linux-x86_64.sh
 
 # 3- Create an alias for loading Anaconda in bashrc file. You can replace 
 # the path with the installation directory specified during installation.
