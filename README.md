@@ -23,7 +23,7 @@ Note that, Paraview version (5.5.2) should be adjusted according to the installe
 ```bash
 # 1- Download Anaconda if you it's not already installed otherwise 
 # go to step 6.
-wget "https://repo.continuum.io/archive/Anaconda2-5.1.0-Linux-x86_64.sh"
+wget "https://repo.anaconda.com/archive/Anaconda2-5.3.0-Linux-x86_64.sh"
 
 # 2- Install Anaconda. It is recommended not to add it to the PATH  
 # system permanently.
