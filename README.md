@@ -58,4 +58,11 @@ source deactivate
 Make sure to use the same version as the installed Paraview.
 
 # CFD Code Development Frameworks (Workshop III)
-Coming soon ...
+This workshop provides an overview of available frameworks for developing CFD codes. The topics are as follows:
+
+1. Introduction to CFD: A general introduction to underpinnings of CFD followed by a discussion on Artificial Compressibility Method (ACM) since it is easy to implement while is applicable to some interesting problems, particularly Lid-Driven Cavity.
+2. Development from scratch: A simple implementation of ACM with Finite Difference method from scratch using C and python. It provides a general overview of programming a solver from scratch.
+3. Development with OpenFOAM: A simple implementation of ACM with Finite Volume method using OpenFOAM framework. It demonstrates advantages of using an already established CFD framework.
+4. Development with Fenics A simple implementation of ACM with Finite Element method using Fenics framework. It demonstrates advantages of using an already established CFD framework.
+
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/uvelocity.pdf" width="300">
