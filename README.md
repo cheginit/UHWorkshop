@@ -1,3 +1,13 @@
+# CFD Code Development Frameworks (Workshop III)
+This workshop provides an overview of available frameworks for developing CFD codes. The slides are [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/CFD.pdf). The topics are as follows:
+
+1. Introduction to CFD: A general introduction to underpinnings of CFD followed by a discussion on Artificial Compressibility Method (ACM) since it is easy to implement while is applicable to some interesting problems, particularly Lid-Driven Cavity.
+2. Development from scratch: A simple implementation of ACM with Finite Difference method from scratch using C and python. It provides a general overview of programming a solver from scratch.
+3. Development with OpenFOAM: A simple implementation of ACM with Finite Volume method using OpenFOAM framework. It demonstrates advantages of using an already established CFD framework.
+4. Development with Fenics A simple implementation of ACM with Finite Element method using Fenics framework. It demonstrates advantages of using an already established CFD framework.
+
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
+
 # OpenFOAM Workshops (I and II):
 Workshop I and II are introductory workshops to OpenFOAM. The slides are [UHOF I](https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/UHOF.pdf) and [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/workshop2/UHOF.pdf). The workshops are project-based and includes the basic concepts of utilizing OpenFOAM's framework. Four cases that are considered for these workshops are as follows; **1D Sod problem** which includes validation with analytical solution, **2D Lid driven cavity** which includes validation with results from the literature, **3D Dam break with obstacle** which includes validation with results from the literature and **V2D ortex Shedding** for demonstrating more advanced meshing and working with paraview python module.
 
@@ -53,13 +63,3 @@ python -c "from paraview.simple import *"
 source deactivate
 ```
 Make sure to use the same version as the installed Paraview.
-
-# CFD Code Development Frameworks (Workshop III)
-This workshop provides an overview of available frameworks for developing CFD codes. The slides are [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/CFD.pdf). The topics are as follows:
-
-1. Introduction to CFD: A general introduction to underpinnings of CFD followed by a discussion on Artificial Compressibility Method (ACM) since it is easy to implement while is applicable to some interesting problems, particularly Lid-Driven Cavity.
-2. Development from scratch: A simple implementation of ACM with Finite Difference method from scratch using C and python. It provides a general overview of programming a solver from scratch.
-3. Development with OpenFOAM: A simple implementation of ACM with Finite Volume method using OpenFOAM framework. It demonstrates advantages of using an already established CFD framework.
-4. Development with Fenics A simple implementation of ACM with Finite Element method using Fenics framework. It demonstrates advantages of using an already established CFD framework.
-
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
