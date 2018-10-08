@@ -33,6 +33,8 @@ conda create -n cfd --file workshop3/requirements.txt
 source activate cfd
 ```
 
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
+
 ___
 
 # OpenFOAM Workshops (I and II):
