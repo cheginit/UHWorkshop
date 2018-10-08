@@ -18,7 +18,7 @@ bash Anaconda3-5.3.0-Linux-x86_64.sh
 
 # 3- Create an alias for loading Anaconda in bashrc file. You can replace 
 # the path with the installation directory specified during installation.
-echo 'alias ana2="export PATH=$HOME/anaconda3/bin:$PATH"' >> ~/.bashrc
+echo 'alias ana3="export PATH=$HOME/anaconda3/bin:$PATH"' >> ~/.bashrc
 
 # 4- Re-source bashrc to make the change.
 source ~/.bashrc
@@ -32,10 +32,9 @@ conda create -n cfd --file workshop3/requirements.txt
 # 7- Load the newly created environment.
 source activate cfd
 ```
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
 
 ___
-
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
 
 # OpenFOAM Workshops (I and II):
 Workshop I and II are introductory workshops to OpenFOAM. The slides are [UHOF I](https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/UHOF.pdf) and [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/workshop2/UHOF.pdf). The workshops are project-based and includes the basic concepts of utilizing OpenFOAM's framework. Four cases that are considered for these workshops are as follows; **1D Sod problem** which includes validation with analytical solution, **2D Lid driven cavity** which includes validation with results from the literature, **3D Dam break with obstacle** which includes validation with results from the literature and **V2D ortex Shedding** for demonstrating more advanced meshing and working with paraview python module.
