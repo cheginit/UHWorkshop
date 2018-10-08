@@ -30,7 +30,7 @@ def savepgf(filename):
 pgf_with_latex = {
     "pgf.texsystem": "pdflatex",
     "text.usetex": True,
-    "font.family": "Latin Modern Roman",
+    "font.family": "DejaVu Sans",
     "font.serif": [],
     "font.sans-serif": [],
     "font.monospace": [],

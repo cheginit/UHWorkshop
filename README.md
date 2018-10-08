@@ -6,6 +6,35 @@ This workshop provides an overview of available frameworks for developing CFD co
 3. Development with OpenFOAM: A simple implementation of ACM with Finite Volume method using OpenFOAM framework. It demonstrates advantages of using an already established CFD framework.
 4. Development with Fenics A simple implementation of ACM with Finite Element method using Fenics framework. It demonstrates advantages of using an already established CFD framework.
 
+The required python libraries can be installed as follows:
+```bash
+# 1- Download Anaconda if you it's not already installed otherwise 
+# go to step 6.
+wget "https://repo.anaconda.com/archive/Anaconda3-5.3.0-Linux-x86_64.sh"
+
+# 2- Install Anaconda. It is recommended not to add it to the PATH  
+# system permanently.
+bash Anaconda3-5.3.0-Linux-x86_64.sh
+
+# 3- Create an alias for loading Anaconda in bashrc file. You can replace 
+# the path with the installation directory specified during installation.
+echo 'alias ana2="export PATH=$HOME/anaconda3/bin:$PATH"' >> ~/.bashrc
+
+# 4- Re-source bashrc to make the change.
+source ~/.bashrc
+
+# 5- Load Anaconda.
+ana3
+
+# 6- Create a new environment called "cfd" and install the libraries.
+conda create -n cfd --file requirements.txt
+
+# 7- Load the newly created environment.
+source activate cfd
+```
+
+___
+
 <img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
 
 # OpenFOAM Workshops (I and II):

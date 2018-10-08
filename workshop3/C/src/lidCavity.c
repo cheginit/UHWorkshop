@@ -12,7 +12,7 @@ Lid-Driven Cavity case:
 Dimensions : 1x1 m
 Grid size  : 128 x 128
 Re number  : 100 / 1000 / 5000 / 10000
-Grid type  : Arakawa C
+Grid type  : Staggered Arakawa C
 Boundary Conditions: u, v -> Dirichlet (as shown below)
                      p    -> Neumann (grad[p] = 0)
 
@@ -77,7 +77,7 @@ int main (int argc, char *argv[])
   const int rv[2][4] = {{xlo, xtot - 1, 0, IY},
                         {0, xtot - 1, ylo, IY}};
 
-  const double tol = 1.0e-8, l_lid = 1.0, gradp = 0.0;
+  const double tol = 1.0e-7, l_lid = 1.0, gradp = 0.0;
 
   /* Simulation parameters */
   double cfl , c2;
@@ -298,7 +298,7 @@ int main (int argc, char *argv[])
     err_p = sqrt(dtdxdy * err_p);
     err_tot = max(err_u, err_v);
     err_tot = max(err_tot, err_p);
-    err_tot = max(err_tot, dx * dy * err_d);
+    err_tot = max(err_tot, err_d);
 
     /* Check if solution diverged */
     if (isnan(err_tot)) {

@@ -1,5 +1,5 @@
 import numpy as np
-from numba import njit, stencil
+from numba import njit, stencil, prange
 
 
 class Grid2D(object):
@@ -66,7 +66,7 @@ class Grid2D(object):
 
 
 class Simulation(object):
-    def __init__(self, grid, cfl, c2, Re, tol=1e-8, itr_max=1e6):
+    def __init__(self, grid, cfl, c2, Re, tol=1e-7, itr_max=1e6):
         self.grid = grid
         self.dt = cfl * min(grid.dx, grid.dy) / grid.BC['u']['t']
         self.nu = grid.BC['u']['t'] * grid.l_lid / Re
@@ -123,8 +123,8 @@ def momentum(uo, vo, po, dt, dx, dy, nu):
     vg = ave_x(vo)
     vc = ave_y(vo)
 
-    for i in range(1, uo.shape[0] - 1):
-        for j in range(1, uo.shape[1] - 1):
+    for i in prange(1, uo.shape[0] - 1):
+        for j in prange(1, uo.shape[1] - 1):
             un[i, j] = uo[i, j] \
                 - dtdx * (uc[i+1, j] * uc[i+1, j] - uc[i, j] * uc[i, j]) \
                 - dtdy * (ug[i, j+1] * vg[i+1, j] - ug[i, j] * vg[i+1, j-1]) \
@@ -132,8 +132,8 @@ def momentum(uo, vo, po, dt, dx, dy, nu):
                 + nu * (dtdxx * (uo[i-1, j] - 2 * uo[i, j] + uo[i+1, j])
                         + dtdyy * (uo[i, j-1] - 2 * uo[i, j] + uo[i, j+1]))
 
-    for i in range(1, vo.shape[0] - 1):
-        for j in range(1, vo.shape[1] - 1):
+    for i in prange(1, vo.shape[0] - 1):
+        for j in prange(1, vo.shape[1] - 1):
             vn[i, j] = vo[i, j] \
                 - dtdx * (ug[i, j+1] * vg[i+1, j] - ug[i-1, j+1] * vg[i, j]) \
                 - dtdy * (vc[i, j+1] * vc[i, j+1] - vc[i, j] * vc[i, j]) \
@@ -148,16 +148,16 @@ def continuity(uo, vo, po, dt, dx, dy, c2):
     dtdx = dt / dx
     dtdy = dt / dy
 
-    dxy = dx * dy
-
     cn_err = np.zeros_like(po)
     pn = po.copy()
 
-    for i in range(1, vo.shape[0] - 1):
-        for j in range(1, uo.shape[1] - 1):
+    err = 0.0
+    for i in prange(1, vo.shape[0] - 1):
+        for j in prange(1, uo.shape[1] - 1):
             cn_err[i, j] = dtdx * (uo[i, j] - uo[i-1, j]) \
                 + dtdy * (vo[i, j] - vo[i, j-1])
             pn[i, j] = po[i, j] - c2 * cn_err[i, j]
+            err += cn_err[i, j]
 
-    return pn, dxy * np.sum(cn_err)
+    return pn, err
 

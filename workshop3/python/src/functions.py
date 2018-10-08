@@ -86,7 +86,7 @@ class Grid2D(object):
 
 
 class Simulation(object):
-    def __init__(self, grid, cfl, c2, Re, tol=1e-8, itr_max=1e6):
+    def __init__(self, grid, cfl, c2, Re, tol=1e-7, itr_max=1e6):
         self.grid = grid
         self.dt = cfl * min(grid.dx, grid.dy) / grid.BC['u']['t']
         self.nu = grid.BC['u']['t'] * grid.l_lid / Re
@@ -184,7 +184,7 @@ class Simulation(object):
 
         pn = g.p.copy()
         pn[s_in] = g.p[s_in] - self.c2 * cn_err[s_in]
-        return pn, dxy * np.sum(cn_err)
+        return pn, np.sum(cn_err)
 
     # Compute L2-norm based on new and pold time steps data
     def l2norm(self, phi_n, phi_o):

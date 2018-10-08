@@ -82,4 +82,4 @@ $(which time) -f "Elapsed=%E" bin/lidCavity $re
 
 [ "$?" -eq "0" ] \
 && echo "Plotting the results" \
-&& python src/plotter.py $re $col
+&& python ../plotter/plotter.py $re $col

@@ -6,47 +6,50 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sys import argv
 
 
-# Read field data
+# Read fields data
 re = argv[1]
 rc = int(argv[2])
 
 files = {'uvp': "data/xyuvp", 'uc': "data/Central_U", 'vc': "data/Central_V",
-         'ue': "data/yu", 've': "data/xv"}
+         'ue': "../plotter/data/yu", 've': "../plotter/data/xv"}
 
 data = {k: np.loadtxt(f, dtype=np.float64) for k, f in files.items()}
 
 # =========================================================================== #
 # Plot velocity at the middle of the domain along the x and y axes
 fig, ax_u = newfig(0.8)
-ax_v = ax_u.twiny().twinx()
+ax_v = ax_u.twinx()
+ax_v2 = ax_v.twiny()
 
 ax_u.plot(data['uc'][:, 0], data['uc'][:, 1], color= 'g',
         label="Numerical, $U_x$", linewidth=0.6)
 ax_u.plot(data['ue'][:, rc], data['ue'][:, 0], '*', color= 'r',
         label="Ghia, $U_x$", linewidth=0.6)
 
-ax_v.plot(data['vc'][:, 1], data['vc'][:, 0],
+ax_v2.plot(data['vc'][:, 1], data['vc'][:, 0],
         label="Numerical, $U_y$", linewidth=0.6)
-ax_v.plot(data['ve'][:, 0], data['ve'][:, rc], 'x',
+ax_v2.plot(data['ve'][:, 0], data['ve'][:, rc], 'x',
         label="Ghia, $U_y$", linewidth=0.6)
+
+ax_u.set_xlim([-1, 1])
+ax_u.set_ylim([0, 1])
+ax_v.set_ylim([-1, 1])
+ax_v2.set_xlim([0, 1])
 
 ax_u.grid(alpha=0.5)
 ax_u.tick_params(direction='out', top=False, right=False)
 ax_u.set_title("Velocity profile along the middle of axes for Re=" + re)
-ax_v.set_xlabel('$x$ (m)')
-ax_v.set_ylabel('$U_y$ (m s$^{-1}$)')
+
 ax_u.set_ylabel('$y$ (m)')
-ax_u.set_xlabel('$U_x$ (m s$^{-1}$)')
-ax_u.legend(loc='center left', bbox_to_anchor=(1.2, 0.1))
-ax_v.legend(loc='center left', bbox_to_anchor=(1.2, 0.27))
+ax_v2.set_xlabel('$x$ (m)')
+ax_u.set_xlabel('$U_y$ (m.s$^{-1}$)')
+ax_v.set_ylabel('$U_x$ (m.s$^{-1}$)')
 
-x0, x1 = ax_u.get_xlim()
-y0, y1 = ax_u.get_ylim()
-ax_u.set_aspect((x1-x0)/(y1-y0))
+ax_u.legend(loc='center left', bbox_to_anchor=(1.25, 0.1))
+ax_v2.legend(loc='center left', bbox_to_anchor=(1.25, 0.27))
 
-x0, x1 = ax_v.get_xlim()
-y0, y1 = ax_v.get_ylim()
-ax_v.set_aspect((x1-x0)/(y1-y0))
+ax_u.set_aspect('auto')
+ax_v.set_aspect('auto')
 
 plt.tight_layout()
 savepgf("velocity")

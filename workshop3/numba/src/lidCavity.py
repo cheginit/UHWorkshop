@@ -12,7 +12,7 @@
 # Dimensions : 1x1 m
 # Grid size  : 128 x 128
 # Re number  : 100 / 1000 / 5000 / 10000
-# Grid type  : Arakawa C
+# Grid type  : Staggered Arakawa C
 # Boundary Conditions: u, v -> Dirichlet (as shown below)
 #                      p    -> Neumann (grad[p] = 0)
 #
