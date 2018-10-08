@@ -32,10 +32,9 @@ conda create -n cfd --file requirements.txt
 # 7- Load the newly created environment.
 source activate cfd
 ```
+<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
 
 ___
-
-<img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
 
 # OpenFOAM Workshops (I and II):
 Workshop I and II are introductory workshops to OpenFOAM. The slides are [UHOF I](https://github.com/taataam/UHOFWorkshop/blob/master/workshop1/UHOF.pdf) and [UHOF II](https://github.com/taataam/UHOFWorkshop/blob/master/workshop2/UHOF.pdf). The workshops are project-based and includes the basic concepts of utilizing OpenFOAM's framework. Four cases that are considered for these workshops are as follows; **1D Sod problem** which includes validation with analytical solution, **2D Lid driven cavity** which includes validation with results from the literature, **3D Dam break with obstacle** which includes validation with results from the literature and **V2D ortex Shedding** for demonstrating more advanced meshing and working with paraview python module.
