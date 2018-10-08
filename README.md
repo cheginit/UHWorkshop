@@ -27,7 +27,7 @@ source ~/.bashrc
 ana3
 
 # 6- Create a new environment called "cfd" and install the libraries.
-conda create -n cfd --file requirements.txt
+conda create -n cfd --file workshop3/requirements.txt
 
 # 7- Load the newly created environment.
 source activate cfd
