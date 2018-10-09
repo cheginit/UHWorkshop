@@ -18,7 +18,7 @@ bash Anaconda3-5.3.0-Linux-x86_64.sh
 
 # 3- Create an alias for loading Anaconda in bashrc file. You can replace 
 # the path with the installation directory specified during installation.
-echo 'alias ana3="source $HOME/anaconda3/etc/profile.d/conda.sh"' >> ~/.bashrc
+echo 'alias ana3="source $HOME/anaconda3/etc/profile.d/conda.sh && export PATH=$HOME/anaconda3/bin:$PATH"' >> ~/.bashrc
 
 # 4- Re-source bashrc to make the change.
 source ~/.bashrc
@@ -70,7 +70,7 @@ bash Anaconda2-5.3.0-Linux-x86_64.sh
 
 # 3- Create an alias for loading Anaconda in bashrc file. You can replace 
 # the path with the installation directory specified during installation.
-echo 'alias ana2="export PATH=$HOME/anaconda2/bin:$PATH"' >> ~/.bashrc
+echo 'alias ana2="source $HOME/anaconda2/etc/profile.d/conda.sh && export PATH=$HOME/anaconda2/bin:$PATH"' >> ~/.bashrc
 
 # 4- Re-source bashrc to make the change.
 source ~/.bashrc
