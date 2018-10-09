@@ -37,8 +37,10 @@ g = fn.Grid2D(128, 128, 1.0)
 
 if Re < 500:
     s = fn.Simulation(g, cfl=0.15, c2=5.0, Re=Re)
-else:
+if Re < 2000:
     s = fn.Simulation(g, cfl=0.20, c2=5.8, Re=Re)
+else:
+    s = fn.Simulation(g, cfl=0.05, c2=5.8, Re=Re)
 
 flog = open('data/residual', 'ab')
 
