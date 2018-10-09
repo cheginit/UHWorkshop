@@ -3,6 +3,17 @@ from numba import njit, stencil, prange
 
 
 class Grid2D(object):
+    """ Generates a mesh assuming equal spacing in x and y direction.
+        Also it allocates required arrays for velocity and pressure.
+
+        Args:
+            ngx (int): Number of grid points in x-direction
+            ngy (int): Number of grid points in y-direction
+            l_lid (float): Dimension of the box
+
+        Returns:
+            Grid class
+    """
     def __init__(self, ngx, ngy, l_lid):
         self.l_lid = l_lid
         self.ngx = ngx
@@ -18,14 +29,17 @@ class Grid2D(object):
         self.dx = l_lid / np.float(ngx - 1)
         self.dy = self.dx
 
+        # Variables on staggered grid points
         self.u = np.zeros([self.ngx, self.ytot], dtype=np.float64)
         self.v = np.zeros([self.xtot, self.ngy], dtype=np.float64)
         self.p = np.zeros([self.xtot, self.ytot], dtype=np.float64)
 
+        # Variabls on original grid points
         self.ug = np.zeros_like(self.u)
         self.vg = np.zeros_like(self.v)
         self.pg = np.zeros_like(self.p)
 
+        # Velocities on cell centers
         self.uc = np.zeros_like(self.u)
         self.vc = np.zeros_like(self.v)
 
@@ -66,6 +80,20 @@ class Grid2D(object):
 
 
 class Simulation(object):
+    """ Generates simulation parameters and solve momentum and continuity
+        equations.
+
+        Args:
+            grid (class): 2D grid class
+            cfl (float): Courant number
+            c2 (float): Squared artificial sound speed (m^2/s^2)
+            Re (float): Reynolds number
+            tol (float): Desired tolerence (default = 1e-7)
+            itr_max (int): Maximum number of iterations
+
+        Returns:
+            Simulation Class
+    """
     def __init__(self, grid, cfl, c2, Re, tol=1e-7, itr_max=1e6):
         self.grid = grid
         self.dt = cfl * min(grid.dx, grid.dy) / grid.BC['u']['t']
@@ -93,21 +121,25 @@ class Simulation(object):
         return np.sqrt(self.dtxy * np.sum((phi_n - phi_o)**2))
 
 
+# Compute average in x-direction
 @stencil
 def ave_x(arr):
     return 0.5 * (arr[-1, 0] + arr[0, 0])
 
 
+# Compute average in y-direction
 @stencil
 def ave_y(arr):
     return 0.5 * (arr[0, -1] + arr[0, 0])
 
 
+# Compute average in 2D
 @stencil
 def ave_xy(arr):
     return 0.25 * (arr[0, 0] + arr[0, -1] + arr[-1, 0] + arr[-1, -1])
 
 
+# Solve momentum equation in x and y direction
 @njit(parallel=True)
 def momentum(uo, vo, po, dt, dx, dy, nu):
     un = uo.copy()
@@ -143,6 +175,7 @@ def momentum(uo, vo, po, dt, dx, dy, nu):
     return un, vn
 
 
+# Solve continuity equation
 @njit(parallel=True)
 def continuity(uo, vo, po, dt, dx, dy, c2):
     dtdx = dt / dx
@@ -160,4 +193,3 @@ def continuity(uo, vo, po, dt, dx, dy, c2):
             err += cn_err[i, j]
 
     return pn, err
-

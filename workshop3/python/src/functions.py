@@ -47,13 +47,14 @@ class Grid2D(object):
                    'v': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
                    'p': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0}}
 
-    # Compute velocity field on grid points and cell centers
+    # Compute velocity field on grid points
     def phi_g(self):
         self.ug[:, self.ylo:] = 0.5 * (self.u[:, self.ylo:]
                                        + self.u[:, self.ylo - 1:-1])
         self.vg[self.xlo:, :] = 0.5 * (self.v[self.xlo:, :]
                                        + self.v[self.xlo - 1:-1, :])
 
+    # Compute velocity field on cell centers
     def phi_c(self):
         self.uc[self.xlo:, :] = 0.5 * (self.u[self.xlo:, :]
                                        + self.u[self.xlo - 1:-1, :])
@@ -100,6 +101,20 @@ class Grid2D(object):
 
 
 class Simulation(object):
+    """ Generates simulation parameters and solve momentum and continuity
+        equations.
+
+        Args:
+            grid (class): 2D grid class
+            cfl (float): Courant number
+            c2 (float): Squared artificial sound speed (m^2/s^2)
+            Re (float): Reynolds number
+            tol (float): Desired tolerence (default = 1e-7)
+            itr_max (int): Maximum number of iterations
+
+        Returns:
+            Simulation Class
+    """
     def __init__(self, grid, cfl, c2, Re, tol=1e-7, itr_max=1e6):
         self.grid = grid
         self.dt = cfl * min(grid.dx, grid.dy) / grid.BC['u']['t']
@@ -130,7 +145,7 @@ class Simulation(object):
         g.u[g.xlo:g.xhi, g.ytot - 1] = g.BC['u']['t']
         g.u[g.xlo:g.xhi, g.ytot - 2] = g.BC['u']['t']
 
-    # @profile
+    # Solve momentum equation in x and y direction
     def momentum(self):
         g = self.grid
         dtdx = self.dt / g.dx
@@ -181,6 +196,7 @@ class Simulation(object):
                             + g.v[s_in[0], s_yt]))
         return un, vn
 
+    # Solve continuity equation
     def continuity(self):
         g = self.grid
         dtdx = self.dt / g.dx
@@ -190,7 +206,6 @@ class Simulation(object):
         s_in = self.s_in
         s_xl = self.s_xl
         s_yb = self.s_yb
-        dxy = self.grid.dx * self.grid.dy
 
         cn_err = np.zeros_like(g.p)
         cn_err[s_in] = dtdx * (g.u[s_in] - g.u[s_xl, s_in[1]]) \
