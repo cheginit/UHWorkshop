@@ -11,7 +11,7 @@ The required python libraries can be installed as follows:
 **Option 1**. If you're using the Hyper-V in the training room, follow these steps:
 ```bash
 sudo yum install centos-release-scl cmake
-sudo yum install rh-python36
+sudo yum install rh-python36 rh-python36-python-tkinter.x86_64 texlive.x86_64 dvipng
 scl enable rh-python36 bash
 sudo -H $(which pip) install -U pip
 sudo -H $(which pip) install -U matplotlib numba numpy flake8
