@@ -33,11 +33,6 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
 #define IX 128
 #define IY 128
 
-/* Define a function to check if a variable is NAN */
-#ifndef isnan
-#define isnan(x) x != x
-#endif
-
 /* Main program */
 int main (int argc, char *argv[])
 {
