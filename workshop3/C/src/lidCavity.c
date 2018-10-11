@@ -71,7 +71,7 @@ int main (int argc, char *argv[])
 
   /* Define arrays for min and max bounds for slicing arrays.
    * First row are bounds for averaging in x direction and second
-   * row for averaging i y direction. */
+   * row for averaging in y direction. */
   const int ru[2][4] = {{xlo, IX, 0, ytot - 1},
                         {0, IX, ylo, ytot - 1}};
   const int rv[2][4] = {{xlo, xtot - 1, 0, IY},
