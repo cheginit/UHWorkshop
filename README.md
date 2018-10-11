@@ -7,6 +7,18 @@ This workshop provides an overview of available frameworks for developing CFD co
 4. Development with Fenics A simple implementation of ACM with Finite Element method using Fenics framework. It demonstrates advantages of using an already established CFD framework.
 
 The required python libraries can be installed as follows:
+
+**Option 1**. If you're using the Hyper-V in the training room, follow these steps:
+```bash
+sudo yum install centos-release-scl
+sudo yum install rh-python36
+sudo yum groupinstall 'Development Tools'
+scl enable rh-python36 bash
+sudo -H $(which pip) install -U pip
+sudo -H $(which pip) install -U matplotlib numba numpy flake8
+```
+
+**Option 2**. Follow these step for other systems
 ```bash
 # 1- Download Anaconda if you it's not already installed otherwise 
 # go to step 6.
