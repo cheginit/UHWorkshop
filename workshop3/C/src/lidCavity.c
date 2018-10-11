@@ -33,14 +33,6 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
 #define IX 128
 #define IY 128
 
-/* Define a max function */
-#ifndef max
-#define max(a,b) \
-  ({ __auto_type _a = (a); \
-     __auto_type _b = (b); \
-     _a > _b ? _a : _b; })
-#endif
-
 /* Define a function to check if a variable is NAN */
 #ifndef isnan
 #define isnan(x) x != x
@@ -296,9 +288,9 @@ int main (int argc, char *argv[])
     err_u = sqrt(dtdxdy * err_u);
     err_v = sqrt(dtdxdy * err_v);
     err_p = sqrt(dtdxdy * err_p);
-    err_tot = max(err_u, err_v);
-    err_tot = max(err_tot, err_p);
-    err_tot = max(err_tot, err_d);
+    err_tot = fmax(err_u, err_v);
+    err_tot = fmax(err_tot, err_p);
+    err_tot = fmax(err_tot, err_d);
 
     /* Check if solution diverged */
     if (isnan(err_tot)) {
