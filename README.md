@@ -44,6 +44,29 @@ conda create -n cfd --file workshop3/requirements.txt
 source activate cfd
 ```
 
+## Instructions:
+The codes can be run as follows:
+
+1. C codes:
+```bash
+./run -r 1000 -c
+```
+where the flag ```-r``` is used to pass the Reynolds number (100, 1000, 5000 or 10000) and ```-c``` should be used if a different configuration for compilation is desired. Moreover, in order to change to the compiler the following commands maybe used:
+```bash
+CC=icc CXX=icpc ./run -r 1000 -c
+```
+for using intel compiler, or:
+```bash
+CC=clang CXX=clang++ ./run -r 1000 -c
+```
+for using clang.
+
+2. Python codes:
+```bash
+./run -r 1000
+```
+where the flag ```-r``` is used to pass the Reynolds number (100, 1000, 5000 or 10000).
+
 <img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
 
 ___
