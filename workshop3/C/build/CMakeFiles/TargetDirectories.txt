@@ -1,3 +1,0 @@
-/home/taher/OpenFOAM/taher-dev/git/UHWorkshop/workshop3/C/build/CMakeFiles/rebuild_cache.dir
-/home/taher/OpenFOAM/taher-dev/git/UHWorkshop/workshop3/C/build/CMakeFiles/lidCavity.dir
-/home/taher/OpenFOAM/taher-dev/git/UHWorkshop/workshop3/C/build/CMakeFiles/edit_cache.dir
