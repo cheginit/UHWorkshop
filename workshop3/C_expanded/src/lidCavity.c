@@ -27,7 +27,6 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
                                   u=0, v=0
 \*============================================================================*/
 #include "functions.h"
-#include <math.h>
 
 /* Specify number of grid points in x and y directions */
 #define IX 128
@@ -36,9 +35,8 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
 /* Main program */
 int main (int argc, char *argv[])
 {
-  /* 4 arrays are required for velocity fields and two for pressure.
-   * Velocity: old, new, grid points, cell centers
-   * Pressure: old and new */
+  /* Two arrays are required for each Variable; one for old time step and one
+   * for the new time step. */
   double **ubufo, **ubufn, **u, **un, **utmp;
   double **vbufo, **vbufn, **v, **vn, **vtmp;
   double **pbufo, **pbufn, **p, **pn, **ptmp;
@@ -92,7 +90,7 @@ int main (int argc, char *argv[])
 
   /* Compute flow parameters based on inputs */
   dx = l_lid / (double) (IX - 1);
-  dy = dx; //l_lid / (double) (IY - 1);
+  dy = dx;
   dt = cfl * fmin(dx,dy) / ut;
   nu = ut * l_lid / Re;
 
@@ -167,9 +165,6 @@ int main (int argc, char *argv[])
 
   /* Start the main loop */
   do {
-    /* phi_gc(u, uc, ug, ru); */
-    /* phi_gc(v, vg, vc, rv); */
-
     /* Solve x-momentum equation for computing u */
     #pragma omp parallel for private(i,j) schedule(auto)
     for (i = xlo; i < xhi; i++) {
@@ -243,7 +238,6 @@ int main (int argc, char *argv[])
       pn[xtot - 1][j] = pn[xtot - 2][j] - dx * gradp;
     }
 
-
     /* Compute L2-norm */
     err_u = err_v = err_p = err_d = 0.0;
     #pragma omp parallel for private(i,j) schedule(auto) \
@@ -261,30 +255,15 @@ int main (int argc, char *argv[])
     err_u = sqrt(dtdxdy * err_u);
     err_v = sqrt(dtdxdy * err_v);
     err_p = sqrt(dtdxdy * err_p);
-    err_tot = fmax(err_u, err_v);
-    err_tot = fmax(err_tot, err_p);
-    err_tot = fmax(err_tot, err_d);
+
+    err_tot = fmaxof(err_u, err_v, err_p, err_d);
 
     /* Check if solution diverged */
     if (isnan(err_tot)) {
       printf("Solution Diverged after %d iterations!\n", itr);
 
-      /* Free the memory */
-      free(*ubufo);
-      free(ubufo);
-      free(*ubufn);
-      free(ubufn);
-
-      free(*vbufo);
-      free(vbufo);
-      free(*vbufn);
-      free(vbufn);
-
-      free(*pbufo);
-      free(pbufo);
-      free(*pbufn);
-      free(pbufn);
-
+      /* Free the memory and terminate */
+      freeMem(ubufo, vbufo, pbufo, ubufn, vbufn, pbufn);
       exit(EXIT_FAILURE);
     }
 
@@ -311,21 +290,8 @@ int main (int argc, char *argv[])
   if (itr == itr_max) {
     printf("Maximum number of iterations, %d, exceeded\n", itr);
 
-    /* Free the memory */
-    free(*ubufo);
-    free(ubufo);
-    free(*ubufn);
-    free(ubufn);
-
-    free(*vbufo);
-    free(vbufo);
-    free(*vbufn);
-    free(vbufn);
-
-    free(*pbufo);
-    free(pbufo);
-    free(*pbufn);
-    free(pbufn);
+    /* Free the memory and terminate */
+    freeMem(ubufo, vbufo, pbufo, ubufn, vbufn, pbufn);
 
     exit(EXIT_FAILURE);
   }
@@ -350,20 +316,7 @@ int main (int argc, char *argv[])
   }
 
   /* Free the memory */
-  free(*ubufo);
-  free(ubufo);
-  free(*ubufn);
-  free(ubufn);
-
-  free(*vbufo);
-  free(vbufo);
-  free(*vbufn);
-  free(vbufn);
-
-  free(*pbufo);
-  free(pbufo);
-  free(*pbufn);
-  free(pbufn);
+  freeMem(ubufo, vbufo, pbufo, ubufn, vbufn, pbufn);
 
   /* Writing fields data for post-processing */
   FILE *fug, *fvg, *fd;
@@ -403,14 +356,7 @@ int main (int argc, char *argv[])
   fclose(fd);
 
   /* Free the memory */
-  free(*u_g);
-  free(u_g);
-
-  free(*v_g);
-  free(v_g);
-
-  free(*p_g);
-  free(p_g);
+  freeMem(u_g, v_g, p_g);
 
   return 0;
 }
