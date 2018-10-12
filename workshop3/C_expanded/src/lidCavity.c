@@ -28,10 +28,6 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
 \*============================================================================*/
 #include "functions.h"
 
-/* Specify number of grid points in x and y directions */
-#define IX 128
-#define IY 128
-
 /* Main program */
 int main (int argc, char *argv[])
 {
@@ -44,20 +40,24 @@ int main (int argc, char *argv[])
   double dx, dy, dt, Re, nu;
   double dtdx, dtdy, dtdxx, dtdyy, dtdxdy;
 
-  int i, j, itr = 1, itr_max = 1e6;
-  double ut, ub, ul, ur;
-  double vt, vb, vl, vr;
+  /* Boundary conditions: {top, left, bottom, right} */
+  double ubc[4] = {1.0, 0.0, 0.0, 0.0};
+  double vbc[4] = {0.0, 0.0, 0.0, 0.0};
+  double pbc[4] = {0.0, 0.0, 0.0, 0.0};
+
+  int i, j;
+
   double err_tot, err_u, err_v, err_p, err_d;
 
-  /* Define first and last interior nodes number for better
+  /* Define first and last interior nodes number for improving
    * code readability*/
-  const int xlo = 1, xhi = IX - 1, xtot = IX + 1, xm = IX/2;
-  const int ylo = 1, yhi = IY - 1, ytot = IY + 1, ym = IY/2;
-
-  const double tol = 1.0e-7, l_lid = 1.0, gradp = 0.0;
+  const int xlo = 1, xhi = IX - 1, xtot = IX + 1;
+  const int ylo = 1, yhi = IY - 1, ytot = IY + 1;
 
   /* Simulation parameters */
   double cfl , c2;
+  const double tol = 1.0e-7, l_lid = 1.0;
+  int itr = 1, itr_max = 1000000;
 
   /* Getting Reynolds number */
   if(argc <= 1) {
@@ -79,11 +79,6 @@ int main (int argc, char *argv[])
       c2 = 5.8;
   }
 
-  /* Boundary condition values */
-  ut = 1.0;
-  ub = ul = ur = 0.0;
-  vt = vb = vl = vr = 0.0;
-
   /* Create a log file for outputting the residuals */
   FILE *flog;
   flog = fopen("data/residual","w+t");
@@ -91,8 +86,8 @@ int main (int argc, char *argv[])
   /* Compute flow parameters based on inputs */
   dx = l_lid / (double) (IX - 1);
   dy = dx;
-  dt = cfl * fmin(dx,dy) / ut;
-  nu = ut * l_lid / Re;
+  dt = cfl * fmin(dx,dy) / ubc[0];
+  nu = ubc[0] * l_lid / Re;
 
   /* Carry out operations that their values do not change in loops */
   dtdx = dt / dx;
@@ -128,40 +123,13 @@ int main (int argc, char *argv[])
 
   /* Apply initial conditions*/
   for (i = xlo; i < xhi; i++) {
-    u[i][ytot - 1] = ut;
-    u[i][ytot - 2] = ut;
+    u[i][ytot - 1] = ubc[0];
+    u[i][ytot - 2] = ubc[0];
   }
 
   /* Applying boundary conditions */
-  /* Dirichlet boundary condition */
-  for (i = xlo; i < xhi; i++) {
-    u[i][0] = ub - u[i][1];
-    u[i][ytot - 1] = 2.0*ut - u[i][ytot - 2];
-  }
-  for (j = 0; j < ytot; j++) {
-    u[0][j] = ul;
-    u[xhi][j] = ur;
-  }
-
-  /* Dirichlet boundary condition */
-  for (i = xlo; i < xtot - 1; i++) {
-    v[i][0] = vb;
-    v[i][yhi] = vt;
-  }
-  for (j = 0; j < IY; j++) {
-    v[0][j] = vl - v[1][j];
-    v[xtot - 1][j] = vr - v[xtot - 2][j];
-  }
-
-  /* Neumann boundary condition */
-  for (i = xlo; i < xtot - 1; i++) {
-    p[i][0] = p[i][1] - dy * gradp;
-    p[i][ytot - 1] = p[i][ytot - 2]  - dy * gradp;
-  }
-  for (j = 0; j < ytot; j++) {
-    p[0][j] = p[1][j] - dx * gradp;
-    p[xtot - 1][j] = p[xtot - 2][j] - dx * gradp;
-  }
+  set_UBC(u, v, ubc, vbc);
+  set_PBC(p, pbc, dx, dy);
 
   /* Start the main loop */
   do {
@@ -199,25 +167,7 @@ int main (int argc, char *argv[])
       }
     }
 
-    /* Dirichlet boundary conditions */
-    for (i = xlo; i < xhi; i++) {
-      un[i][0] = ub - un[i][1];
-      un[i][ytot - 1] = 2.0*ut - un[i][ytot - 2];
-    }
-    for (j = 0; j < ytot; j++) {
-      un[0][j] = ul;
-      un[xhi][j] = ur;
-    }
-
-    /* Dirichlet boundary conditions */
-    for (i = xlo; i < xtot - 1; i++) {
-      vn[i][0] = vb;
-      vn[i][yhi] = vt;
-    }
-    for (j = 0; j < IY; j++) {
-      vn[0][j] = vr - vn[1][j];
-      vn[xtot - 1][j] = vl - vn[xtot - 2][j];
-    }
+    set_UBC(u, v, ubc, vbc);
 
     /* Solves continuity equation for computing P */
     #pragma omp parallel for private(i,j) schedule(auto)
@@ -228,15 +178,7 @@ int main (int argc, char *argv[])
       }
     }
 
-    /* Neumann boundary conditions */
-    for (i = xlo; i < xtot - 1; i++) {
-      pn[i][0] = pn[i][1] - dy * gradp;
-      pn[i][ytot - 1] = pn[i][ytot - 2]  - dy * gradp;
-    }
-    for (j = 0; j < ytot; j++) {
-      pn[0][j] = pn[1][j] - dx * gradp;
-      pn[xtot - 1][j] = pn[xtot - 2][j] - dx * gradp;
-    }
+    set_PBC(p, pbc, dx, dy);
 
     /* Compute L2-norm */
     err_u = err_v = err_p = err_d = 0.0;
@@ -300,7 +242,7 @@ int main (int argc, char *argv[])
   fclose(flog);
 
   /* Computing new arrays for computing the fields along lines crossing
-     the center of the domain in x- and y-directions */
+     the centers of the axes in x- and y-directions */
   double **u_g, **v_g, **p_g;
   v_g = array_2d(IX, IY);
   u_g = array_2d(IX, IY);
@@ -318,45 +260,11 @@ int main (int argc, char *argv[])
   /* Free the memory */
   freeMem(ubufo, vbufo, pbufo, ubufn, vbufn, pbufn);
 
-  /* Writing fields data for post-processing */
-  FILE *fug, *fvg, *fd;
-
-  /* Velocity field value along a line crossing the middle of x-axis */
-  fug = fopen("data/Central_U","w+t");
-  fprintf(fug, "# U, Y\n");
-
-  for (j = 0; j < IY; j++) {
-    fprintf(fug, "%.8lf \t %.8lf\n", 0.5 * (u_g[xm][j] + u_g[xm + 1][j]),
-            (double) j*dy );
-  }
-
-  fclose(fug);
-
-  /* Velocity field value along a line crossing the middle of y-axis */
-  fvg = fopen("data/Central_V","w+t");
-  fprintf(fug, "# V, X\n");
-
-  for (i = 0; i < IX; i++) {
-    fprintf(fvg, "%.8lf \t %.8lf\n", 0.5 * (v_g[i][ym] + v_g[i][ym + 1]),
-            (double) i*dx );
-  }
-
-  fclose(fvg);
-
-  /* Writing all the field data */
-  fd = fopen("data/xyuvp","w+t");
-  fprintf(fd, "# X \t Y \t U \t V \t P\n");
-  for (i = 0; i < IX; i++) {
-    for (j = 0; j < IY; j++) {
-       fprintf(fd, "%.8lf \t %.8lf \t %.8lf \t %.8lf \t %.8lf\n",
-               (double) i*dx, (double) j*dy, u_g[i][j], v_g[i][j], p_g[i][j]);
-    }
-  }
-
-  fclose(fd);
+  /* Write output data */
+  dump_data(u_g, v_g, p_g, dx, dy);
 
   /* Free the memory */
   freeMem(u_g, v_g, p_g);
-
+  
   return 0;
 }
