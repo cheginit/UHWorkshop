@@ -10,7 +10,14 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_SOURCE_DIR}/build)
 
-set (CMAKE_C_FLAGS "-march=native -O3 -std=c11 -Wall")
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  set (CMAKE_C_FLAGS "-march=native -O3 -std=c11 -Wall")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  set (CMAKE_C_FLAGS "-march=native -flto -O3 -std=gnu11 -Wall")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+  set (CMAKE_C_FLAGS "-xHost -O3 -std=c11 -Wall")
+endif()
+
 option (USE_OpenMP "Use OpenMP" ON)
 if(USE_OpenMP)
   find_package(OpenMP)
