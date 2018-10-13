@@ -42,41 +42,41 @@ double **array_2d(const int row, const int col) {
   return arr;
 }
 
-void set_UBC(double **u, double **v, double ubc[4], double vbc[4]) {
+void set_UBC(double **un, double **vn, double ubc[4], double vbc[4]) {
     int i, j;
 
     /* Dirichlet boundary condition */
    for (i = 1; i < IX - 1; i++) {
-      u[i][0] = ubc[2] - u[i][1];
-      u[i][IY] = 2.0*ubc[0] - u[i][IY - 1];
+      un[i][0] = ubc[2] - un[i][1];
+      un[i][IY] = 2.0*ubc[0] - un[i][IY - 1];
     }
     for (j = 0; j < IY + 1; j++) {
-      u[0][j] = ubc[1];
-      u[IX - 1][j] = ubc[3];
+      un[0][j] = ubc[1];
+      un[IX - 1][j] = ubc[3];
     }
 
     /* Dirichlet boundary condition */
     for (i = 1; i < IX; i++) {
-      v[i][0] = vbc[2];
-      v[i][IY - 1] = vbc[0];
+      vn[i][0] = vbc[2];
+      vn[i][IY - 1] = vbc[0];
     }
     for (j = 0; j < IY; j++) {
-      v[0][j] = vbc[1] - v[1][j];
-      v[IX][j] = vbc[3] - v[IX - 1][j];
+      vn[0][j] = vbc[1] - vn[1][j];
+      vn[IX][j] = vbc[3] - vn[IX - 1][j];
     }
 }
 
 /* Applying boundary conditions for pressure */
-void set_PBC(double **p, double pbc[4], double dx, double dy) {
+void set_PBC(double **pn, double pbc[4], double dx, double dy) {
     /* Neumann boundary condition */
     for (int i = 1; i < IX; i++) {
-      p[i][0] = p[i][1] - dy * pbc[2];
-      p[i][IY] = p[i][IY - 1]  - dy * pbc[0];
+      pn[i][0] = pn[i][1] - dy * pbc[2];
+      pn[i][IY] = pn[i][IY - 1]  - dy * pbc[0];
     }
 
     for (int j = 0; j < IY + 1; j++) {
-      p[0][j] = p[1][j] - dx * pbc[1];
-      p[IX][j] = p[IX - 1][j] - dx * pbc[3];
+      pn[0][j] = pn[1][j] - dx * pbc[1];
+      pn[IX][j] = pn[IX - 1][j] - dx * pbc[3];
     }
 }
 

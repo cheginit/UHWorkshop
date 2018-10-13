@@ -167,7 +167,7 @@ int main (int argc, char *argv[])
       }
     }
 
-    set_UBC(u, v, ubc, vbc);
+    set_UBC(un, vn, ubc, vbc);
 
     /* Solves continuity equation for computing P */
     #pragma omp parallel for private(i,j) schedule(auto)
@@ -178,7 +178,7 @@ int main (int argc, char *argv[])
       }
     }
 
-    set_PBC(p, pbc, dx, dy);
+    set_PBC(pn, pbc, dx, dy);
 
     /* Compute L2-norm */
     err_u = err_v = err_p = err_d = 0.0;
