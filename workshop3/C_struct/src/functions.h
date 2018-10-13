@@ -58,7 +58,7 @@ struct Grid2D {
   double **u_g;
   double **p_g;
 
-  /* Boundary conditions: {top, left, bottom, right} */
+  /* Boundary conditions: {0:top, 1:left, 2:bottom, 3:right} */
   double *ubc;
   double *vbc;
   double *pbc;
@@ -160,6 +160,24 @@ void dump_data(struct Grid2D *g) {
   const int xm = IX / 2, ym = IY / 2;
   int i, j;
 
+  g->u_g = array_2D(IX, IY);
+  g->v_g = array_2D(IX, IY);
+  g->p_g = array_2D(IX, IY);
+
+#pragma omp parallel for private(i, j) schedule(auto)
+  for (i = 0; i < IX; i++) {
+    for (j = 0; j < IY; j++) {
+      g->u_g[i][j] = 0.5 * (s.u[i][j + 1] + s.u[i][j]);
+      g->v_g[i][j] = 0.5 * (s.v[i + 1][j] + s.v[i][j]);
+      g->p_g[i][j] = 0.25 * (s.p[i][j] + s.p[i + 1][j] + s.p[i][j + 1] +
+                             s.p[i + 1][j + 1]);
+    }
+  }
+
+  /* Free the memory */
+  freeMem(g->ubufo, g->vbufo, g->pbufo, g->ubufn, g->vbufn, g->pbufn, g->ubc,
+          g->vbc, g->pbc);
+
   /* Writing fields data for post-processing */
   FILE *fug, *fvg, *fd;
 
@@ -197,6 +215,9 @@ void dump_data(struct Grid2D *g) {
   }
 
   fclose(fd);
+
+  /* Free the memory */
+  freeMem(g->u_g, g->v_g, g->p_g);
 }
 
 #endif /* FUNCTIONS_H */

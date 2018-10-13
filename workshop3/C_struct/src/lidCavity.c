@@ -186,7 +186,8 @@ int main(int argc, char *argv[]) {
       printf("Solution Diverged after %d iterations!\n", itr);
 
       /* Free the memory and terminate */
-      freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn);
+      freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn, g.ubc,
+              g.vbc, g.pbc);
       exit(EXIT_FAILURE);
     }
 
@@ -194,7 +195,7 @@ int main(int argc, char *argv[]) {
     fprintf(flog, "%d \t %.8lf \t %.8lf \t %.8lf \t %.8lf \t %.8lf\n", itr,
             err_tot, err_u, err_v, err_p, err_d);
 
-    /* Changing pointers to point to the newly computed fields */
+    /* Update the fields */
     update(&s);
     itr += 1;
   } while (err_tot > tol && itr < itr_max);
@@ -203,36 +204,16 @@ int main(int argc, char *argv[]) {
     printf("Maximum number of iterations, %d, exceeded\n", itr);
 
     /* Free the memory and terminate */
-    freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn);
-
+    freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn, g.ubc, g.vbc,
+            g.pbc);
     exit(EXIT_FAILURE);
   }
 
   printf("Converged after %d iterations\n", itr);
   fclose(flog);
 
-  g.u_g = array_2D(IX, IY);
-  g.v_g = array_2D(IX, IY);
-  g.p_g = array_2D(IX, IY);
-
-#pragma omp parallel for private(i, j) schedule(auto)
-  for (i = 0; i < IX; i++) {
-    for (j = 0; j < IY; j++) {
-      g.u_g[i][j] = 0.5 * (s.u[i][j + 1] + s.u[i][j]);
-      g.v_g[i][j] = 0.5 * (s.v[i + 1][j] + s.v[i][j]);
-      g.p_g[i][j] = 0.25 * (s.p[i][j] + s.p[i + 1][j] + s.p[i][j + 1] +
-                            s.p[i + 1][j + 1]);
-    }
-  }
-
-  /* Free the memory */
-  freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn);
-
   /* Write output data */
   dump_data(&g);
-
-  /* Free the memory */
-  freeMem(g.u_g, g.v_g, g.p_g);
 
   return 0;
 }
