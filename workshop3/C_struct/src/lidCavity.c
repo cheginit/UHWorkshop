@@ -29,180 +29,157 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
 #include "functions.h"
 
 /* Main program */
-int main (int argc, char *argv[])
-{
-  /* Two arrays are required for each Variable; one for old time step and one
-   * for the new time step. */
-  double **u, **un, **utmp;
-  double **v, **vn, **vtmp;
-  double **p, **pn, **ptmp;
-
-  double dt, Re, nu;
+int main(int argc, char *argv[]) {
+  double Re, cfl;
   double dtdx, dtdy, dtdxx, dtdyy, dtdxdy;
-
-  int i, j;
-
   double err_tot, err_u, err_v, err_p, err_d;
-
-  /* Simulation parameters */
-  double cfl , c2;
   const double tol = 1.0e-7, l_lid = 1.0;
-  int itr = 1, itr_max = 1000000;
+
+  int i, j, itr = 1;
+  const int itr_max = 1000000;
 
   /* Getting Reynolds number */
-  if(argc <= 1) {
+  if (argc <= 1) {
     Re = 100.0;
   } else {
     char *ptr;
     Re = strtod(argv[1], &ptr);
   }
-  printf("Re number is set to %d\n", (int) Re);
-
-  /* Set c2 and cfl according to Re based on trail and error */
-  if (Re < 500) {
-      cfl = 0.15;
-      c2 = 5.0;
-  } else if (Re < 2000) {
-      cfl = 0.20;
-      c2 = 5.8;
-  } else {
-      cfl = 0.05;
-      c2 = 5.8;
-  }
+  printf("Re number is set to %d\n", (int)Re);
 
   /* Create a log file for outputting the residuals */
   FILE *flog;
-  flog = fopen("data/residual","w+t");
+  flog = fopen("data/residual", "w+t");
 
-  g = ((struct Grid2D) {
-        .ubufo = array_2D(IX, IY+1),
-        .ubufn = array_2D(IX, IY+1),
-        .vbufo = array_2D(IX+1, IY),
-        .vbufn = array_2D(IX+1, IY),
-        .pbufo = array_2D(IX+1, IY+1),
-        .pbufn = array_2D(IX+1, IY+1),
-        .ubc = (double*)malloc(4*sizeof(double)),
-        .vbc = (double*)malloc(4*sizeof(double)),
-        .pbc = (double*)malloc(4*sizeof(double)),
-        .dx = l_lid / (double) (IX - 1),
-        .dy = l_lid / (double) (IY - 1)
-    }
-  );
+  g = ((struct Grid2D){.ubufo = array_2D(IX, IY + 1),
+                       .ubufn = array_2D(IX, IY + 1),
+                       .vbufo = array_2D(IX + 1, IY),
+                       .vbufn = array_2D(IX + 1, IY),
+                       .pbufo = array_2D(IX + 1, IY + 1),
+                       .pbufn = array_2D(IX + 1, IY + 1),
+                       .ubc = (double *)malloc(4 * sizeof(double)),
+                       .vbc = (double *)malloc(4 * sizeof(double)),
+                       .pbc = (double *)malloc(4 * sizeof(double)),
+                       .dx = l_lid / (double)(IX - 1),
+                       .dy = l_lid / (double)(IY - 1)});
 
   /* Boundary conditions: {0:top, 1:left, 2:bottom, 3:right} */
-  g.ubc[0] = 1;
-  g.ubc[1] = g.ubc[2] = g.ubc[3] = 0;
-  g.vbc[0] = g.vbc[1] = g.vbc[2] = g.vbc[3] = 0;
-  g.pbc[0] = g.pbc[1] = g.pbc[2] = g.pbc[3] = 0;
+  g.ubc[0] = 1.0;
+  g.ubc[1] = g.ubc[2] = g.ubc[3] = 0.0;
+  g.vbc[0] = g.vbc[1] = g.vbc[2] = g.vbc[3] = 0.0;
+  g.pbc[0] = g.pbc[1] = g.pbc[2] = g.pbc[3] = 0.0;
 
-  /* Compute flow parameters based on inputs */
-  dt = cfl * fmin(g.dx,g.dy) / g.ubc[0];
-  nu = g.ubc[0] * l_lid / Re;
+  /* Set c2 and cfl according to Re based on trail and error */
+  if (Re < 500) {
+    cfl = 0.15;
+    s.c2 = 5.0;
+  } else if (Re < 2000) {
+    cfl = 0.20;
+    s.c2 = 5.8;
+  } else {
+    cfl = 0.05;
+    s.c2 = 5.8;
+  }
+
+  s = ((struct Simulation){.u = g.ubufo,
+                           .un = g.ubufn,
+                           .v = g.vbufo,
+                           .vn = g.vbufn,
+                           .p = g.pbufo,
+                           .pn = g.pbufn,
+                           .dt = cfl * fmin(g.dx, g.dy) / g.ubc[0],
+                           .nu = g.ubc[0] * l_lid / Re,
+                           .c2 = s.c2});
 
   /* Carry out operations that their values do not change in loops */
-  dtdx = dt / g.dx;
-  dtdy = dt / g.dy;
-  dtdxx = dt / (g.dx * g.dx);
-  dtdyy = dt / (g.dy * g.dy);
-  dtdxdy = dt * g.dx * g.dy;
-
-  /* Define two pointers to the generated buffers for velocity field
-   * in x-direction */
-  u = g.ubufo;
-  un = g.ubufn;
-
-  /* Define two pointers to the generated buffers for velocity field
-   * in y-direction */
-  v = g.vbufo;
-  vn = g.vbufn;
-
-  /* Define two pointers to the generated buffers for pressure field*/
-  p = g.pbufo;
-  pn = g.pbufn;
+  dtdx = s.dt / g.dx;
+  dtdy = s.dt / g.dy;
+  dtdxx = s.dt / (g.dx * g.dx);
+  dtdyy = s.dt / (g.dy * g.dy);
+  dtdxdy = s.dt * g.dx * g.dy;
 
   /* Apply initial conditions*/
   for (i = 1; i < IX - 1; i++) {
-    un[i][IY] = g.ubc[0];
-    un[i][IY - 1] = g.ubc[0];
+    s.un[i][IY] = g.ubc[0];
+    s.un[i][IY - 1] = g.ubc[0];
   }
 
   /* Applying boundary conditions */
-  set_UBC(un, vn, &g);
-  set_PBC(pn, &g);
-  utmp = u;
-  u = un;
-  un = utmp;
+  set_UBC(&s, &g);
+  set_PBC(&s, &g);
+  update(&s);
 
   /* Start the main loop */
   do {
-    /* Solve x-momentum equation for computing u */
-    #pragma omp parallel for private(i,j) schedule(auto)
+/* Solve x-momentum equation for computing u */
+#pragma omp parallel for private(i, j) schedule(auto)
     for (i = 1; i < IX - 1; i++) {
       for (j = 1; j < IY; j++) {
-        un[i][j] = u[i][j]
-                   - 0.25*dtdx * (pow(u[i+1][j] + u[i][j], 2)
-                                  - pow(u[i][j] + u[i-1][j], 2)) \
-                   - 0.25*dtdy * ((u[i][j+1] + u[i][j])
-                                  * (v[i+1][j] + v[i][j])
-                                  - (u[i][j] + u[i][j-1])
-                                  * (v[i+1][j-1] + v[i][j-1])) \
-                   - dtdx * (p[i+1][j] - p[i][j])
-                   + nu * (dtdxx * (u[i+1][j] - 2.0 * u[i][j] + u[i-1][j])
-                           + dtdyy * (u[i][j+1] - 2.0 * u[i][j] + u[i][j-1]));
+        s.un[i][j] =
+            s.u[i][j] -
+            0.25 * dtdx *
+                (pow(s.u[i + 1][j] + s.u[i][j], 2) -
+                 pow(s.u[i][j] + s.u[i - 1][j], 2)) -
+            0.25 * dtdy *
+                ((s.u[i][j + 1] + s.u[i][j]) * (s.v[i + 1][j] + s.v[i][j]) -
+                 (s.u[i][j] + s.u[i][j - 1]) *
+                     (s.v[i + 1][j - 1] + s.v[i][j - 1])) -
+            dtdx * (s.p[i + 1][j] - s.p[i][j]) +
+            s.nu * (dtdxx * (s.u[i + 1][j] - 2.0 * s.u[i][j] + s.u[i - 1][j]) +
+                    dtdyy * (s.u[i][j + 1] - 2.0 * s.u[i][j] + s.u[i][j - 1]));
       }
     }
 
-    /* Solve y-momentum for computing v */
-    #pragma omp parallel for private(i,j) schedule(auto)
+/* Solve y-momentum for computing v */
+#pragma omp parallel for private(i, j) schedule(auto)
     for (i = 1; i < IX; i++) {
       for (j = 1; j < IY - 1; j++) {
-        vn[i][j] = v[i][j]
-                   - 0.25*dtdx * ((u[i][j+1] + u[i][j])
-                                  * (v[i+1][j] + v[i][j])
-                                  - (u[i-1][j+1] + u[i-1][j])
-                                  * (v[i][j] + v[i-1][j])) \
-                   - 0.25*dtdy * (pow(v[i][j+1] + v[i][j], 2)
-                                  - pow(v[i][j] + v[i][j-1], 2)) \
-                   - dtdy * (p[i][j+1] - p[i][j])
-                   + nu * (dtdxx * (v[i+1][j] - 2.0 * v[i][j] + v[i-1][j])
-                           + dtdyy * (v[i][j+1] - 2.0 * v[i][j] + v[i][j-1]));
+        s.vn[i][j] =
+            s.v[i][j] -
+            0.25 * dtdx *
+                ((s.u[i][j + 1] + s.u[i][j]) * (s.v[i + 1][j] + s.v[i][j]) -
+                 (s.u[i - 1][j + 1] + s.u[i - 1][j]) *
+                     (s.v[i][j] + s.v[i - 1][j])) -
+            0.25 * dtdy *
+                (pow(s.v[i][j + 1] + s.v[i][j], 2) -
+                 pow(s.v[i][j] + s.v[i][j - 1], 2)) -
+            dtdy * (s.p[i][j + 1] - s.p[i][j]) +
+            s.nu * (dtdxx * (s.v[i + 1][j] - 2.0 * s.v[i][j] + s.v[i - 1][j]) +
+                    dtdyy * (s.v[i][j + 1] - 2.0 * s.v[i][j] + s.v[i][j - 1]));
       }
     }
 
-    set_UBC(un, vn, &g);
+    set_UBC(&s, &g);
 
-    /* Solves continuity equation for computing P */
-    #pragma omp parallel for private(i,j) schedule(auto)
+/* Solves continuity equation for computing P */
+#pragma omp parallel for private(i, j) schedule(auto)
     for (i = 1; i < IX; i++) {
       for (j = 1; j < IY; j++) {
-        pn[i][j] = p[i][j] - c2 * ((un[i][j] - un[i-1][j]) * dtdx
-                                   + (vn[i][j] - vn[i][j-1]) * dtdy);
+        s.pn[i][j] = s.p[i][j] - s.c2 * ((s.un[i][j] - s.un[i - 1][j]) * dtdx +
+                                         (s.vn[i][j] - s.vn[i][j - 1]) * dtdy);
       }
     }
 
-    set_PBC(pn, &g);
+    set_PBC(&s, &g);
 
     /* Compute L2-norm */
     err_u = err_v = err_p = err_d = 0.0;
-    #pragma omp parallel for private(i,j) schedule(auto) \
+#pragma omp parallel for private(i,j) schedule(auto) \
                              reduction(+:err_u, err_v, err_p, err_d)
     for (i = 1; i < IX - 1; i++) {
       for (j = 1; j < IY - 1; j++) {
-        err_u += pow(un[i][j] - u[i][j], 2);
-        err_v += pow(vn[i][j] - v[i][j], 2);
-        err_p += pow(pn[i][j] - p[i][j], 2);
-        err_d += (un[i][j] - un[i-1][j]) * dtdx
-                 + (vn[i][j] - vn[i][j-1]) * dtdy;
+        err_u += pow(s.un[i][j] - s.u[i][j], 2);
+        err_v += pow(s.vn[i][j] - s.v[i][j], 2);
+        err_p += pow(s.pn[i][j] - s.p[i][j], 2);
+        err_d += (s.un[i][j] - s.un[i - 1][j]) * dtdx +
+                 (s.vn[i][j] - s.vn[i][j - 1]) * dtdy;
       }
     }
 
     err_u = sqrt(dtdxdy * err_u);
     err_v = sqrt(dtdxdy * err_v);
     err_p = sqrt(dtdxdy * err_p);
-
     err_tot = fmaxof(err_u, err_v, err_p, err_d);
-    /* if (itr % 5000 == 0) */
-    /*     printf("err = %e\n", err_tot); */
 
     /* Check if solution diverged */
     if (isnan(err_tot)) {
@@ -214,22 +191,11 @@ int main (int argc, char *argv[])
     }
 
     /* Write relative error */
-    fprintf(flog ,"%d \t %.8lf \t %.8lf \t %.8lf \t %.8lf \t %.8lf\n",
-            itr, err_tot, err_u, err_v, err_p, err_d);
+    fprintf(flog, "%d \t %.8lf \t %.8lf \t %.8lf \t %.8lf \t %.8lf\n", itr,
+            err_tot, err_u, err_v, err_p, err_d);
 
     /* Changing pointers to point to the newly computed fields */
-    utmp = u;
-    u = un;
-    un = utmp;
-
-    vtmp = v;
-    v = vn;
-    vn = vtmp;
-
-    ptmp = p;
-    p = pn;
-    pn = ptmp;
-
+    update(&s);
     itr += 1;
   } while (err_tot > tol && itr < itr_max);
 
@@ -249,13 +215,14 @@ int main (int argc, char *argv[])
   g.v_g = array_2D(IX, IY);
   g.p_g = array_2D(IX, IY);
 
-  #pragma omp parallel for private(i,j) schedule(auto)
+#pragma omp parallel for private(i, j) schedule(auto)
   for (i = 0; i < IX; i++) {
-   for (j = 0; j < IY; j++) {
-     g.u_g[i][j] = 0.5 * (u[i][j+1] + u[i][j]);
-     g.v_g[i][j] = 0.5 * (v[i+1][j] + v[i][j]);
-     g.p_g[i][j] = 0.25 * (p[i][j] + p[i + 1][j] + p[i][j + 1] + p[i + 1][j + 1]);
-   }
+    for (j = 0; j < IY; j++) {
+      g.u_g[i][j] = 0.5 * (s.u[i][j + 1] + s.u[i][j]);
+      g.v_g[i][j] = 0.5 * (s.v[i + 1][j] + s.v[i][j]);
+      g.p_g[i][j] = 0.25 * (s.p[i][j] + s.p[i + 1][j] + s.p[i][j + 1] +
+                            s.p[i + 1][j + 1]);
+    }
   }
 
   /* Free the memory */
