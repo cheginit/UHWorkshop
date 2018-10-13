@@ -85,6 +85,7 @@ compile_commands.json
 CTestTestfile.cmake
 build
 bin
+data
 
 ### JupyterNotebook ###
 .ipynb_checkpoints
