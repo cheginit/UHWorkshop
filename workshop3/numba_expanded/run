@@ -66,4 +66,4 @@ $(which time) -f "Elapsed=%E" python3 src/lidCavity.py $re
 [ "$?" -eq "0" ] \
 && rm -f output/*.pdf \
 && echo "Plotting the results" \
-&& python ../plotter/plotter.py $re $col
+&& python3 ../plotter/plotter.py $re $col
