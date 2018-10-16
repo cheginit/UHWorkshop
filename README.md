@@ -67,6 +67,19 @@ for using clang.
 ```
 where the flag ```-r``` is used to pass the Reynolds number (100, 1000, 5000 or 10000).
 
+Additionally, the code can be manually compiled as follows:
+```bash
+gcc -march=native -O3 -fopenmp src/lidCavity.c -o bin/lidCavity -lm
+```
+or if using intel compiler:
+```bash
+icc -xHost -O3 -qopenmp src/lidCavity.c -o bin/lidCavity -lm
+```
+and may be run by invoking:
+```bash
+bin/lidCavity 100
+```
+
 <img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
 
 ___
