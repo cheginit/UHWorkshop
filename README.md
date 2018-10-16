@@ -44,7 +44,7 @@ conda create -n cfd --file workshop3/requirements.txt
 source activate cfd
 ```
 
-## Instructions:
+## Instructions
 The codes can be run as follows:
 
 1. C codes:
