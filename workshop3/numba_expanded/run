@@ -57,6 +57,7 @@ done
 
 [ -z "$re" ] && setRe 100
 [ ! -d output ] && mkdir output
+[ ! -d data ] && mkdir data
 
 rm -f data/Central* data/residual
 
