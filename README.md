@@ -78,7 +78,8 @@ icc -xHost -O3 -qopenmp src/lidCavity.c -o bin/lidCavity -lm
 ```
 and may be run by invoking:
 ```bash
-bin/lidCavity 100
+bin/lidCavity 1000
+python ../plotter/plotter.py 1000 2
 ```
 
 <img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
