@@ -69,6 +69,7 @@ where the flag ```-r``` is used to pass the Reynolds number (100, 1000, 5000 or 
 
 Additionally, the code can be manually compiled as follows:
 ```bash
+mkdir bin build data
 gcc -march=native -O3 -fopenmp src/lidCavity.c -o bin/lidCavity -lm
 ```
 or if using intel compiler:
