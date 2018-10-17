@@ -6,6 +6,8 @@ This workshop provides an overview of available frameworks for developing CFD co
 3. Development with OpenFOAM: A simple implementation of ACM with Finite Volume method using OpenFOAM framework. It demonstrates advantages of using an already established CFD framework.
 4. Development with Fenics A simple implementation of ACM with Finite Element method using Fenics framework. It demonstrates advantages of using an already established CFD framework.
 
+Please note that all the codes are tested in Linux environemnt only. So it might not work on other OSs such macOS. If any problem is encountered please open up an issue and possibility send a pull request with a fix.
+
 The required python libraries can be installed as follows:
 
 **Option 1**. If you're using the Hyper-V in the training room, follow these steps:
