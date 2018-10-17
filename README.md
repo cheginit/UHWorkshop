@@ -79,10 +79,10 @@ or if using intel compiler:
 ```bash
 icc -xHost -O3 -qopenmp src/lidCavity.c -o bin/lidCavity -lm
 ```
-and may be run by invoking:
+and may be run, for example for Re = 1000, by invoking:
 ```bash
 bin/lidCavity 1000
-python ../plotter/plotter.py 1000 2
+python3 ../plotter/plotter.py 1000 2
 ```
 
 <img src="https://github.com/taataam/UHOFWorkshop/blob/master/workshop3/OpenFOAM/cavity/plots/results.png" width="700">
