@@ -44,7 +44,7 @@ class Grid2D(object):
         self.vc = np.zeros_like(self.v)
 
         # Set of boundary conditions
-        self.BC = {'u': {'t': 1.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
+        self.BC = {'u': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
                    'v': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0},
                    'p': {'t': 0.0, 'b': 0.0, 'r': 0.0, 'l': 0.0}}
 
@@ -96,8 +96,8 @@ class Simulation(object):
     """
     def __init__(self, grid, cfl, c2, Re, tol=1e-7, itr_max=1e6):
         self.grid = grid
-        self.dt = cfl * min(grid.dx, grid.dy) / grid.BC['u']['t']
-        self.nu = grid.BC['u']['t'] * grid.l_lid / Re
+        self.dt = 1e-4  # cfl * min(grid.dx, grid.dy) / grid.BC['u']['t']
+        self.nu = 0.2  # grid.BC['u']['t'] * grid.l_lid / Re
         self.c2 = c2
         self.re = Re
         self.tol = tol

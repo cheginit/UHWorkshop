@@ -33,7 +33,7 @@ import functions as fn
 
 Re = np.float64(argv[1]) if len(argv) == 2 else 100.0
 print("Re number is set to {:d}".format(int(Re)))
-g = fn.Grid2D(128, 128, 1.0)
+g = fn.Grid2D(128, 128, 2.0*np.pi)
 
 if Re < 500:
     s = fn.Simulation(g, cfl=0.15, c2=5.0, Re=Re)
@@ -43,6 +43,15 @@ else:
     s = fn.Simulation(g, cfl=0.05, c2=5.8, Re=Re)
 
 flog = open('data/residual', 'ab')
+
+for i in range(g.u.shape[0]):
+    for j in range(g.u.shape[1]):
+        g.u[i, j] = np.sin(i*g.dx) * np.cos(j*g.dy)
+
+
+for i in range(g.v.shape[0]):
+    for j in range(g.v.shape[1]):
+        g.v[i, j] = - np.cos(i*g.dx) * np.sin(j*g.dy)
 
 itr = 1
 while True:
