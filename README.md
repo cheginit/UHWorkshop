@@ -55,11 +55,11 @@ The codes can be run as follows:
 ```
 where the flag ```-r``` is used to pass the Reynolds number (100, 1000, 5000 or 10000) and ```-c``` should be used if a different configuration for compilation is desired. Moreover, in order to change to the compiler the following commands maybe used:
 ```bash
-CC=icc CXX=icpc ./run -r 1000 -c
+CC=icc ./run -r 1000 -c
 ```
 for using intel compiler, or:
 ```bash
-CC=clang CXX=clang++ ./run -r 1000 -c
+CC=clang ./run -r 1000 -c
 ```
 for using clang.
 
