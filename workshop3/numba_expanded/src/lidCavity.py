@@ -30,10 +30,9 @@ import numpy as np
 from sys import argv, exit
 import functions as fn
 
-
 Re = np.float64(argv[1]) if len(argv) == 2 else 100.0
 print("Re number is set to {:d}".format(int(Re)))
-g = fn.Grid2D(128, 128, 2.0*np.pi)
+g = fn.Grid2D(128, 128, 2.0 * np.pi)
 
 if Re < 500:
     s = fn.Simulation(g, cfl=0.15, c2=5.0, Re=Re)
@@ -43,15 +42,6 @@ else:
     s = fn.Simulation(g, cfl=0.05, c2=5.8, Re=Re)
 
 flog = open('data/residual', 'ab')
-
-for i in range(g.u.shape[0]):
-    for j in range(g.u.shape[1]):
-        g.u[i, j] = np.sin(i*g.dx) * np.cos(j*g.dy)
-
-
-for i in range(g.v.shape[0]):
-    for j in range(g.v.shape[1]):
-        g.v[i, j] = - np.cos(i*g.dx) * np.sin(j*g.dy)
 
 itr = 1
 while True:
@@ -108,16 +98,20 @@ yp = np.linspace(0.0, g.l_lid, g.ngy)
 xpos, ypos = np.meshgrid(xp, yp)
 
 # Compute v at the middle of domain along x-axis
-v_mid = 0.5 * np.sum(v_y[:,
-                         np.int(v_x.shape[1] / 2) - 1:
-                         np.int(v_x.shape[1] / 2) + 1], axis=1)
+v_mid = 0.5 * np.sum(
+    v_y[:, np.int(v_x.shape[1] / 2) - 1:np.int(v_x.shape[1] / 2) + 1], axis=1)
 # Compute u at the middle of domain along y-axis
-u_mid = 0.5 * np.sum(v_x[np.int(v_y.shape[0] / 2) - 1:
-                         np.int(v_y.shape[0] / 2) + 1, :], axis=0)
+u_mid = 0.5 * np.sum(
+    v_x[np.int(v_y.shape[0] / 2) - 1:np.int(v_y.shape[0] / 2) + 1, :], axis=0)
 
 # Write the field data visulization
 np.savetxt('data/Central_U', np.c_[u_mid, yp], fmt='%.8f')
 np.savetxt('data/Central_V', np.c_[v_mid, xp], fmt='%.8f')
-np.savetxt('data/xyuvp', np.c_[xpos.reshape(-1), ypos.reshape(-1),
-                               v_x.reshape(-1), v_y.reshape(-1),
-                               p_g.reshape(-1)], fmt='%.8f')
+np.savetxt(
+    'data/xyuvp',
+    np.c_[xpos.reshape(-1),
+          ypos.reshape(-1),
+          v_x.reshape(-1),
+          v_y.reshape(-1),
+          p_g.reshape(-1)],
+    fmt='%.8f')
