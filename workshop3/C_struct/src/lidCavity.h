@@ -20,47 +20,45 @@ struct Grid2D {
   double **pbufo;
   double **pbufn;
 
-  /* Computing new arrays for computing the fields along lines crossing
-   * the centers of the axes in x- and y-directions */
-  double **v_g;
-  double **u_g;
-  double **p_g;
-
-  /* Boundary conditions: {0:top, 1:left, 2:bottom, 3:right} */
+  /* Boundary conditions */
   double *ubc;
   double *vbc;
   double *pbc;
 
+  /* Grid Spacing */
   double dx;
   double dy;
 } g;
 
-struct Simulation {
-  /* Define two pointers to the generated buffers for each variable*/
+struct FieldPointers {
+  /* Two pointers to the generated buffers for each variable */
   double **u;
   double **un;
   double **v;
   double **vn;
   double **p;
   double **pn;
+} f;
 
+struct SimulationInfo {
   /* Flow parameters based on inputs */
   double dt;
   double nu;
   double c2;
+  double cfl;
 } s;
 
 /* Generate a 2D array using pointer to a pointer */
-double **array_2D(const int row, const int col);
+double **array_2D(int row, int col);
 
 /* Update the fields to the new time step for the next iteration */
-void update(struct Simulation *s);
+void update(struct FieldPointers *f);
 
 /* Applying boundary conditions for velocity */
-void set_UBC(struct Simulation *s, struct Grid2D *g);
+void set_UBC(struct FieldPointers *f, struct Grid2D *g);
 
 /* Applying boundary conditions for pressure */
-void set_PBC(struct Simulation *s, struct Grid2D *g);
+void set_PBC(struct FieldPointers *f, struct Grid2D *g, struct SimulationInfo *s);
 
 /* Free the memory */
 void freeMem(double **phi, ...);
@@ -69,6 +67,6 @@ void freeMem(double **phi, ...);
 double fmaxof(double errs, ...);
 
 /* Save fields data to files */
-void dump_data(struct Grid2D *g);
+void dump_data(struct Grid2D *g, struct SimulationInfo *s);
 
 #endif /* FUNCTIONS_H */

@@ -45,3 +45,5 @@ target_link_libraries(lidCavity
   ${OMP_LIB}
   m
 )
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
