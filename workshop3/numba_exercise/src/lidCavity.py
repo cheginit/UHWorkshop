@@ -32,7 +32,7 @@ import functions as fn
 
 Re = np.float64(argv[1]) if len(argv) == 2 else 100.0
 print("Re number is set to {:d}".format(int(Re)))
-g = fn.Grid2D(128, 128, 1.0)
+g = fn.Grid2D(128, 128, 2.0 * np.pi)
 
 if Re < 500:
     s = fn.Simulation(g, cfl=0.15, c2=5.0, Re=Re)

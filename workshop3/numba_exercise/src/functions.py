@@ -47,7 +47,7 @@ class Grid2D(object):
         # Set of boundary conditions
         self.BC = {
             'u': {
-                't': 1.0,
+                't': 0.0,
                 'b': 0.0,
                 'r': 0.0,
                 'l': 0.0
@@ -115,8 +115,8 @@ class Simulation(object):
 
     def __init__(self, grid, cfl, c2, Re, tol=1e-7, itr_max=1e6):
         self.grid = grid
-        self.dt = cfl * min(grid.dx, grid.dy) / grid.BC['u']['t']
-        self.nu = grid.BC['u']['t'] * grid.l_lid / Re
+        self.dt = 1e-4  # cfl * min(grid.dx, grid.dy) / grid.BC['u']['t']
+        self.nu = 0.2  # grid.BC['u']['t'] * grid.l_lid / Re
         self.c2 = c2
         self.re = Re
         self.tol = tol
@@ -132,8 +132,15 @@ class Simulation(object):
     # Impose initial condition
     def init_cond(self):
         g = self.grid
-        g.u[g.xlo:g.xhi, g.ytot - 1] = g.BC['u']['t']
-        g.u[g.xlo:g.xhi, g.ytot - 2] = g.BC['u']['t']
+        # g.u[g.xlo:g.xhi, g.ytot - 1] = g.BC['u']['t']
+        # g.u[g.xlo:g.xhi, g.ytot - 2] = g.BC['u']['t']
+        for i in range(1, g.u.shape[0] - 1):
+            for j in range(1, g.u.shape[1] - 1):
+                g.u[i, j] = np.sin(i * g.dx) * np.cos(j * g.dy)
+
+        for i in range(1, g.v.shape[0] - 1):
+            for j in range(1, g.v.shape[1] - 1):
+                g.v[i, j] = -np.cos(i * g.dx) * np.sin(j * g.dy)
 
     # Compute L2-norm based on new and pold time steps data
     def l2norm(self, phi_n, phi_o):
