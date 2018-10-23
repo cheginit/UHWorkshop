@@ -20,11 +20,6 @@ struct Grid2D {
   double **pbufo;
   double **pbufn;
 
-  /* Boundary conditions */
-  double *ubc;
-  double *vbc;
-  double *pbc;
-
   /* Grid Spacing */
   double dx;
   double dy;
@@ -41,6 +36,11 @@ struct FieldPointers {
 } f;
 
 struct SimulationInfo {
+  /* Boundary conditions */
+  double ubc[4];
+  double vbc[4];
+  double pbc[4];
+
   /* Flow parameters based on inputs */
   double dt;
   double nu;
@@ -55,10 +55,12 @@ double **array_2D(int row, int col);
 void update(struct FieldPointers *f);
 
 /* Applying boundary conditions for velocity */
-void set_UBC(struct FieldPointers *f, struct Grid2D *g);
+void set_UBC(struct FieldPointers *f, struct Grid2D *g,
+             struct SimulationInfo *s);
 
 /* Applying boundary conditions for pressure */
-void set_PBC(struct FieldPointers *f, struct Grid2D *g, struct SimulationInfo *s);
+void set_PBC(struct FieldPointers *f, struct Grid2D *g,
+             struct SimulationInfo *s);
 
 /* Free the memory */
 void freeMem(double **phi, ...);

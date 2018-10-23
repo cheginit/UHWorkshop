@@ -19,7 +19,6 @@ set_target_properties(lidCavity
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
 )
 
-
 target_compile_options(lidCavity
   PUBLIC
   -march=native -O3 -std=c11 -Wall

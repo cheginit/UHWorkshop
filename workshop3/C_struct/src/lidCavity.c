@@ -56,9 +56,6 @@ int main(int argc, char *argv[]) {
                        .vbufn = array_2D(IX + 1, IY),
                        .pbufo = array_2D(IX + 1, IY + 1),
                        .pbufn = array_2D(IX + 1, IY + 1),
-                       .ubc = (double *)malloc(4 * sizeof(double)),
-                       .vbc = (double *)malloc(4 * sizeof(double)),
-                       .pbc = (double *)malloc(4 * sizeof(double)),
                        .dx = l_lid / (double)(IX - 1),
                        .dy = l_lid / (double)(IY - 1)});
 
@@ -70,16 +67,15 @@ int main(int argc, char *argv[]) {
                               .pn = g.pbufn});
 
   /* Boundary conditions: {0:top, 1:left, 2:bottom, 3:right} */
-  g.ubc[0] = 1.0;
-  g.ubc[1] = g.ubc[2] = g.ubc[3] = 0.0;
-  g.vbc[0] = g.vbc[1] = g.vbc[2] = g.vbc[3] = 0.0;
-  g.pbc[0] = g.pbc[1] = g.pbc[2] = g.pbc[3] = 0.0;
+  s = ((struct SimulationInfo){.ubc = {1.0, 0.0, 0.0, 0.0},
+                               .vbc = {0.0, 0.0, 0.0, 0.0},
+                               .pbc = {0.0, 0.0, 0.0, 0.0}});
 
   /* Set c2 and cfl according to Re based on trail and error */
-  if (Re < 500) {
+  if (Re < 500.0) {
     s.cfl = 0.15;
     s.c2 = 5.0;
-  } else if (Re < 2000) {
+  } else if (Re < 2000.0) {
     s.cfl = 0.20;
     s.c2 = 5.8;
   } else {
@@ -87,8 +83,8 @@ int main(int argc, char *argv[]) {
     s.c2 = 5.8;
   }
 
-  s.nu = g.ubc[0] * l_lid / Re;
-  s.dt = s.cfl * fmin(g.dx, g.dy) / g.ubc[0];
+  s.nu = s.ubc[0] * l_lid / Re;
+  s.dt = s.cfl * fmin(g.dx, g.dy) / s.ubc[0];
 
   /* Carry out operations that their values do not change in loops */
   dtdx = s.dt / g.dx;
@@ -99,12 +95,12 @@ int main(int argc, char *argv[]) {
 
   /* Apply initial conditions*/
   for (i = 1; i < IX - 1; i++) {
-    f.un[i][IY] = g.ubc[0];
-    f.un[i][IY - 1] = g.ubc[0];
+    f.un[i][IY] = s.ubc[0];
+    f.un[i][IY - 1] = s.ubc[0];
   }
 
   /* Applying boundary conditions */
-  set_UBC(&f, &g);
+  set_UBC(&f, &g, &s);
   set_PBC(&f, &g, &s);
   update(&f);
 
@@ -148,7 +144,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    set_UBC(&f, &g);
+    set_UBC(&f, &g, &s);
 
 /* Solves continuity equation for computing P */
 #pragma omp parallel for private(i, j) schedule(auto)
@@ -185,8 +181,7 @@ int main(int argc, char *argv[]) {
       printf("Solution Diverged after %d iterations!\n", itr);
 
       /* Free the memory and terminate */
-      freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn, g.ubc,
-              g.vbc, g.pbc);
+      freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn);
       exit(EXIT_FAILURE);
     }
 
@@ -203,8 +198,7 @@ int main(int argc, char *argv[]) {
     printf("Maximum number of iterations, %d, exceeded\n", itr);
 
     /* Free the memory and terminate */
-    freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn, g.ubc, g.vbc,
-            g.pbc);
+    freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn);
     exit(EXIT_FAILURE);
   }
 
@@ -271,27 +265,28 @@ void update(struct FieldPointers *f) {
 }
 
 /* Applying boundary conditions for velocity */
-void set_UBC(struct FieldPointers *f, struct Grid2D *g) {
+void set_UBC(struct FieldPointers *f, struct Grid2D *g,
+             struct SimulationInfo *s) {
   int i, j;
 
   /* Dirichlet boundary condition */
   for (i = 1; i < IX - 1; i++) {
-    f->un[i][0] = g->ubc[2] - f->un[i][1];
-    f->un[i][IY] = 2.0 * g->ubc[0] - f->un[i][IY - 1];
+    f->un[i][0] = s->ubc[2] - f->un[i][1];
+    f->un[i][IY] = 2.0 * s->ubc[0] - f->un[i][IY - 1];
   }
   for (j = 0; j < IY + 1; j++) {
-    f->un[0][j] = g->ubc[1];
-    f->un[IX - 1][j] = g->ubc[3];
+    f->un[0][j] = s->ubc[1];
+    f->un[IX - 1][j] = s->ubc[3];
   }
 
   /* Dirichlet boundary condition */
   for (i = 1; i < IX; i++) {
-    f->vn[i][0] = g->vbc[2];
-    f->vn[i][IY - 1] = g->vbc[0];
+    f->vn[i][0] = s->vbc[2];
+    f->vn[i][IY - 1] = s->vbc[0];
   }
   for (j = 0; j < IY; j++) {
-    f->vn[0][j] = g->vbc[1] - f->vn[1][j];
-    f->vn[IX][j] = g->vbc[3] - f->vn[IX - 1][j];
+    f->vn[0][j] = s->vbc[1] - f->vn[1][j];
+    f->vn[IX][j] = s->vbc[3] - f->vn[IX - 1][j];
   }
 }
 
@@ -300,13 +295,13 @@ void set_PBC(struct FieldPointers *f, struct Grid2D *g,
              struct SimulationInfo *s) {
   /* Neumann boundary condition */
   for (int i = 1; i < IX; i++) {
-    f->pn[i][0] = f->pn[i][1] - g->dy * g->pbc[2];
-    f->pn[i][IY] = f->pn[i][IY - 1] - g->dy * g->pbc[0];
+    f->pn[i][0] = f->pn[i][1] - g->dy * s->pbc[2];
+    f->pn[i][IY] = f->pn[i][IY - 1] - g->dy * s->pbc[0];
   }
 
   for (int j = 0; j < IY + 1; j++) {
-    f->pn[0][j] = f->pn[1][j] - g->dx * g->pbc[1];
-    f->pn[IX][j] = f->pn[IX - 1][j] - g->dx * g->pbc[3];
+    f->pn[0][j] = f->pn[1][j] - g->dx * s->pbc[1];
+    f->pn[IX][j] = f->pn[IX - 1][j] - g->dx * s->pbc[3];
   }
 }
 
@@ -355,8 +350,7 @@ void dump_data(struct Grid2D *g, struct SimulationInfo *s) {
   }
 
   /* Free the memory */
-  freeMem(g->ubufo, g->vbufo, g->pbufo, g->ubufn, g->vbufn, g->pbufn, g->ubc,
-          g->vbc, g->pbc);
+  freeMem(g->ubufo, g->vbufo, g->pbufo, g->ubufn, g->vbufn, g->pbufn);
 
   /* Velocity field value along a line crossing the middle of x-axis */
   fug = fopen("data/Central_U", "w+t+e");
