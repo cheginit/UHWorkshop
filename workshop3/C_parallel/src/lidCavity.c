@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
   double Re = 100.0;
   double dtdx, dtdy, dtdxx, dtdyy, dtdxdy;
   double err_tot, err_u, err_v, err_p, err_d;
+  double gerr_u, gerr_v, gerr_p, gerr_d;
   const double tol = 1.0e-7, l_lid = 1.0;
 
   int i, j, itr = 1;
@@ -40,24 +41,47 @@ int main(int argc, char *argv[]) {
 
   FILE *flog;
 
-  /* Getting Reynolds number */
-  if (argc > 1) {
-    char *ptr;
-    Re = strtod(argv[1], &ptr);
+  int rank, nprocs, provided;
+
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
+  MPI_Comm_size(WORLD, &nprocs);
+  MPI_Comm_rank(WORLD, &rank);
+
+  if (MASTER) {
+    /* Getting Reynolds number */
+    if (argc > 1) {
+      char *ptr;
+      Re = strtod(argv[1], &ptr);
+    }
+    printf("Re number is set to %d\n", (int)Re);
+
+    /* Create a log file for outputting the residuals */
+    flog = fopen("data/residual", "w+t");
   }
-  printf("Re number is set to %d\n", (int)Re);
+  MPI_Bcast(&Re, 1, MPI_DOUBLE, 0, WORLD);
 
-  /* Create a log file for outputting the residuals */
-  flog = fopen("data/residual", "w+t");
+  /* set neighbors */
+  if (MASTER || LAST_NODE) {
+    g.ghosts = 1;
+  } else {
+    g.ghosts = 2;
+  }
 
-  g.ubufo = array_2D(IX, IY + 1);
-  g.ubufn = array_2D(IX, IY + 1);
-  g.vbufo = array_2D(IX + 1, IY);
-  g.vbufn = array_2D(IX + 1, IY);
-  g.pbufo = array_2D(IX + 1, IY + 1);
-  g.pbufn = array_2D(IX + 1, IY + 1);
-  g.dx = l_lid / (double)(IX - 1);
-  g.dy = l_lid / (double)(IY - 1);
+  /* Set number of rows. Last nodes has one extra grid since the grid is
+   * staggered */
+  g.nrows = (int)IY / nprocs + g.ghosts;
+  if (LAST_NODE) {
+    g.nrows_ex = g.nrows + 1;
+  } else {
+    g.nrows_ex = g.nrows;
+  }
+
+  g.ubufo = array_2D(IX, g.nrows_ex);
+  g.ubufn = array_2D(IX, g.nrows_ex);
+  g.vbufo = array_2D(IX + 1, g.nrows);
+  g.vbufn = array_2D(IX + 1, g.nrows);
+  g.pbufo = array_2D(IX + 1, g.nrows_ex);
+  g.pbufn = array_2D(IX + 1, g.nrows_ex);
 
   f.u = g.ubufo;
   f.un = g.ubufn;
@@ -83,6 +107,9 @@ int main(int argc, char *argv[]) {
     s.c2 = 5.8;
   }
 
+  g.dx = l_lid / (double)(IX - 1);
+  g.dy = g.dx;
+
   s.nu = s.ubc[0] * l_lid / Re;
   s.dt = s.cfl * fmin(g.dx, g.dy) / s.ubc[0];
 
@@ -100,7 +127,8 @@ int main(int argc, char *argv[]) {
   }
 
   /* Applying boundary conditions */
-  set_BC(&f, &g, &s);
+  set_UBC(&f, &g, &s);
+  set_PBC(&f, &g, &s);
   update(&f);
 
   /* Start the main loop */
@@ -143,6 +171,8 @@ int main(int argc, char *argv[]) {
       }
     }
 
+    set_UBC(&f, &g, &s);
+
 /* Solves continuity equation for computing P */
 #pragma omp parallel for private(i, j) schedule(auto)
     for (i = 1; i < IX; i++) {
@@ -152,7 +182,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    set_BC(&f, &g, &s);
+    set_PBC(&f, &g, &s);
 
     /* Compute L2-norm */
     err_u = err_v = err_p = err_d = 0.0;
@@ -203,7 +233,7 @@ int main(int argc, char *argv[]) {
   fclose(flog);
 
   /* Write output data */
-  dump_data(&g);
+  dump_data(&g, &s);
 
   return 0;
 }
@@ -262,8 +292,8 @@ void update(struct FieldPointers *f) {
 }
 
 /* Applying boundary conditions for velocity */
-void set_BC(struct FieldPointers *f, struct Grid2D *g,
-            struct SimulationInfo *s) {
+void set_UBC(struct FieldPointers *f, struct Grid2D *g,
+             struct SimulationInfo *s) {
   int i, j;
 
   /* Dirichlet boundary condition */
@@ -285,7 +315,11 @@ void set_BC(struct FieldPointers *f, struct Grid2D *g,
     f->vn[0][j] = s->vbc[1] - f->vn[1][j];
     f->vn[IX][j] = s->vbc[3] - f->vn[IX - 1][j];
   }
+}
 
+/* Applying boundary conditions for pressure */
+void set_PBC(struct FieldPointers *f, struct Grid2D *g,
+             struct SimulationInfo *s) {
   /* Neumann boundary condition */
   for (int i = 1; i < IX; i++) {
     f->pn[i][0] = f->pn[i][1] - g->dy * s->pbc[2];
@@ -320,7 +354,7 @@ double fmaxof(double errs, ...) {
 }
 
 /* Save fields data to files */
-void dump_data(struct Grid2D *g) {
+void dump_data(struct Grid2D *g, struct SimulationInfo *s) {
   const int xm = IX / 2, ym = IY / 2;
   int i, j;
 
@@ -335,10 +369,10 @@ void dump_data(struct Grid2D *g) {
 #pragma omp parallel for private(i, j) schedule(auto)
   for (i = 0; i < IX; i++) {
     for (j = 0; j < IY; j++) {
-      ug[i][j] = 0.5 * (g->ubufn[i][j + 1] + g->ubufn[i][j]);
-      vg[i][j] = 0.5 * (g->vbufn[i + 1][j] + g->vbufn[i][j]);
-      pg[i][j] = 0.25 * (g->pbufn[i][j] + g->pbufn[i + 1][j] +
-                         g->pbufn[i][j + 1] + g->pbufn[i + 1][j + 1]);
+      ug[i][j] = 0.5 * (f.u[i][j + 1] + f.u[i][j]);
+      vg[i][j] = 0.5 * (f.v[i + 1][j] + f.v[i][j]);
+      pg[i][j] = 0.25 * (f.p[i][j] + f.p[i + 1][j] + f.p[i][j + 1] +
+                         f.p[i + 1][j + 1]);
     }
   }
 
