@@ -5,31 +5,46 @@ from matplotlib import cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sys import argv
 
-
 # Read fields data
 re = argv[1]
 rc = int(argv[2])
 
-files = {'uvp': "data/xyuvp", 'uc': "data/Central_U", 'vc': "data/Central_V",
-         'ue': "../plotter/data/yu", 've': "../plotter/data/xv"}
+files = {
+    'uvp': "data/xyuvp",
+    'ue': "../plotter/data/yu",
+    've': "../plotter/data/xv"
+}
 
 data = {k: np.loadtxt(f, dtype=np.float64) for k, f in files.items()}
 
 # =========================================================================== #
 # Plot velocity at the middle of the domain along the x and y axes
+x = np.unique(data['uvp'][:, 0])
+y = np.unique(data['uvp'][:, 1])
+u, v, p = [data['uvp'][:, i].reshape(np.shape(x)[0], -1).T for i in [2, 3, 4]]
+um = u[:, int(u.shape[1] / 2)]
+vm = v[int(v.shape[0] / 2), :]
+
 fig, ax_u = newfig(0.8)
 ax_v = ax_u.twinx()
 ax_v2 = ax_v.twiny()
 
-ax_u.plot(data['uc'][:, 0], data['uc'][:, 1], color= 'g',
-        label="Numerical, $U_x$", linewidth=0.6)
-ax_u.plot(data['ue'][:, rc], data['ue'][:, 0], '*', color= 'r',
-        label="Ghia, $U_x$", linewidth=0.6)
+ax_u.plot(um, y, color='g', label="Numerical, $U_x$", linewidth=0.6)
+ax_u.plot(
+    data['ue'][:, rc],
+    data['ue'][:, 0],
+    '*',
+    color='r',
+    label="Ghia, $U_x$",
+    linewidth=0.6)
 
-ax_v2.plot(data['vc'][:, 1], data['vc'][:, 0],
-        label="Numerical, $U_y$", linewidth=0.6)
-ax_v2.plot(data['ve'][:, 0], data['ve'][:, rc], 'x',
-        label="Ghia, $U_y$", linewidth=0.6)
+ax_v2.plot(x, vm, label="Numerical, $U_y$", linewidth=0.6)
+ax_v2.plot(
+    data['ve'][:, 0],
+    data['ve'][:, rc],
+    'x',
+    label="Ghia, $U_y$",
+    linewidth=0.6)
 
 ax_u.set_xlim([-1, 1])
 ax_u.set_ylim([0, 1])
@@ -58,17 +73,14 @@ plt.clf()
 
 # =========================================================================== #
 # Extract fields data from input including X, Y, u, v and p
-x = np.unique(data['uvp'][:, 0])
-y = np.unique(data['uvp'][:, 1])
 
-u, v, p = [data['uvp'][:, i].reshape(np.shape(x)[0], -1).T for i in [2, 3, 4]]
 vel = np.sqrt(u * u + v * v)
 X, Y = np.meshgrid(x, y)
 
 # Plot pressure contours and streamlines
 fig, ax = newfig(0.7)
 divider = make_axes_locatable(ax)
-lw = 3*vel / vel.max()
+lw = 3 * vel / vel.max()
 cax = divider.append_axes('right', size='5%', pad=0.05)
 
 cf = ax.contourf(X, Y, p, alpha=0.5, cmap=cm.viridis)
@@ -84,4 +96,3 @@ ax.set_xlabel('$x$ (m)')
 ax.set_ylabel('$y$ (m)')
 plt.tight_layout()
 savepgf("pressure_stream")
-

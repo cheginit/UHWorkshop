@@ -328,12 +328,11 @@ double fmaxof(double errs, ...) {
 
 /* Save fields data to files */
 void dump_data(struct Grid2D *g, struct SimulationInfo *s) {
-  const int xm = IX / 2, ym = IY / 2;
   int i, j;
 
   double **ug, **vg, **pg;
 
-  FILE *fug, *fvg, *fd;
+  FILE *fd;
 
   ug = array_2D(IX, IY);
   vg = array_2D(IX, IY);
@@ -352,28 +351,6 @@ void dump_data(struct Grid2D *g, struct SimulationInfo *s) {
   /* Free the memory */
   freeMem(g->ubufo, g->vbufo, g->pbufo, g->ubufn, g->vbufn, g->pbufn);
 
-  /* Velocity field value along a line crossing the middle of x-axis */
-  fug = fopen("data/Central_U", "w+t+e");
-  fprintf(fug, "# U, Y\n");
-
-  for (j = 0; j < IY; j++) {
-    fprintf(fug, "%.8lf \t %.8lf\n", 0.5 * (ug[xm][j] + ug[xm + 1][j]),
-            (double)j * g->dy);
-  }
-
-  fclose(fug);
-
-  /* Velocity field value along a line crossing the middle of y-axis */
-  fvg = fopen("data/Central_V", "w+t+e");
-  fprintf(fug, "# V, X\n");
-
-  for (i = 0; i < IX; i++) {
-    fprintf(fvg, "%.8lf \t %.8lf\n", 0.5 * (vg[i][ym] + vg[i][ym + 1]),
-            (double)i * g->dx);
-  }
-
-  fclose(fvg);
-
   /* Writing all the field data */
   fd = fopen("data/xyuvp", "w+t+e");
   fprintf(fd, "# X \t Y \t U \t V \t P\n");
@@ -384,7 +361,6 @@ void dump_data(struct Grid2D *g, struct SimulationInfo *s) {
               pg[i][j]);
     }
   }
-
   fclose(fd);
 
   /* Free the memory */
