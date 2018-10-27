@@ -45,7 +45,7 @@ int main (int argc, char *argv[])
   double vbc[4] = {0.0, 0.0, 0.0, 0.0};
   double pbc[4] = {0.0, 0.0, 0.0, 0.0};
 
-  int i, j;
+  int i, j, count;
 
   double err_tot, err_u, err_v, err_p, err_d;
 
@@ -198,14 +198,16 @@ int main (int argc, char *argv[])
     err_v = sqrt(dtdxdy * err_v);
     err_p = sqrt(dtdxdy * err_p);
 
-    err_tot = fmaxof(err_u, err_v, err_p, err_d);
+    count = 4;
+    err_tot = fmaxof(count, err_u, err_v, err_p, err_d);
 
     /* Check if solution diverged */
     if (isnan(err_tot)) {
       printf("Solution Diverged after %d iterations!\n", itr);
 
       /* Free the memory and terminate */
-      freeMem(ubufo, vbufo, pbufo, ubufn, vbufn, pbufn);
+      count = 6;
+      freeMem(count, ubufo, vbufo, pbufo, ubufn, vbufn, pbufn);
       exit(EXIT_FAILURE);
     }
 
@@ -233,7 +235,8 @@ int main (int argc, char *argv[])
     printf("Maximum number of iterations, %d, exceeded\n", itr);
 
     /* Free the memory and terminate */
-    freeMem(ubufo, vbufo, pbufo, ubufn, vbufn, pbufn);
+    count = 6;
+    freeMem(count, ubufo, vbufo, pbufo, ubufn, vbufn, pbufn);
 
     exit(EXIT_FAILURE);
   }
@@ -258,13 +261,15 @@ int main (int argc, char *argv[])
   }
 
   /* Free the memory */
-  freeMem(ubufo, vbufo, pbufo, ubufn, vbufn, pbufn);
+  count = 6;
+  freeMem(count, ubufo, vbufo, pbufo, ubufn, vbufn, pbufn);
 
   /* Write output data */
   dump_data(u_g, v_g, p_g, dx, dy);
 
   /* Free the memory */
-  freeMem(u_g, v_g, p_g);
+  count = 3;
+  freeMem(count, u_g, v_g, p_g);
   
   return 0;
 }
@@ -345,55 +350,43 @@ void set_PBC(double **pn, double pbc[4], double dx, double dy) {
 }
 
 /* Free the memory */
-void freeMem(double **phi, ...) {
-    va_list args;
-    va_start(args, phi);
-    free(*va_arg(args, double**));
-    free(va_arg(args, double**));
-    va_end(args);
+void freeMem(int count, ...) {
+  double **arr;
+  va_list args;
+
+  va_start(args, count);
+  for (int i = 1; i <= count; i++) {
+    arr = va_arg(args, double **);
+    free(*arr);
+    *arr = NULL;
+    free(arr);
+    arr = NULL;
+  }
+  va_end(args);
 }
 
 /* Find mamximum of a set of float numebrs */
-double fmaxof(double errs, ...){
-    double max = errs, val;
-    va_list args;
+double fmaxof(int count, ...) {
+  va_list args; 
+  double max, err;
 
-    va_start(args, errs);
-    val = va_arg(args, double);
-    max = fmax(val, max);
-    va_end(args);
-    return max;
+  va_start(args, count);
+  max = va_arg(args, double);
+  for (int i = 2; i <= count; i++) 
+    if ((err = va_arg(args, double)) > max) 
+        max = err; 
+
+  va_end(args); 
+  
+  return max;
 }
 
 /* Save fields data to files */
 void dump_data(double **u, double **v, double **p, double dx, double dy) {
-    const int xm = IX/2, ym = IY/2;
     int i, j;
 
     /* Writing fields data for post-processing */
-    FILE *fug, *fvg, *fd;
-
-    /* Velocity field value along a line crossing the middle of x-axis */
-    fug = fopen("data/Central_U","w+t");
-    fprintf(fug, "# U, Y\n");
-
-    for (j = 0; j < IY; j++) {
-    fprintf(fug, "%.8lf \t %.8lf\n", 0.5 * (u[xm][j] + u[xm + 1][j]),
-            (double) j*dy );
-    }
-
-    fclose(fug);
-
-    /* Velocity field value along a line crossing the middle of y-axis */
-    fvg = fopen("data/Central_V","w+t");
-    fprintf(fug, "# V, X\n");
-
-    for (i = 0; i < IX; i++) {
-    fprintf(fvg, "%.8lf \t %.8lf\n", 0.5 * (v[i][ym] + v[i][ym + 1]),
-            (double) i*dx );
-    }
-
-    fclose(fvg);
+    FILE *fd;
 
     /* Writing all the field data */
     fd = fopen("data/xyuvp","w+t");

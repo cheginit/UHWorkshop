@@ -29,8 +29,8 @@ Boundary Conditions: u, v -> Dirichlet (as shown below)
 #include "lidCavity.h"
 
 int main(int argc, char *argv[]) {
-  int itr = 1;
-  const double tol = 1.0e-7;
+  int itr = 1, count = 6;
+  const double tol = 1.0e-6;
   const int itr_max = 1000000;
 
   FILE *flog;
@@ -69,7 +69,8 @@ int main(int argc, char *argv[]) {
     if (isnan(s.err_tot)) {
       printf("Solution Diverged after %d iterations!\n", itr);
       /* Free the memory and terminate */
-      freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn);
+      count = 6;
+      freeMem(count, g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn);
       exit(EXIT_FAILURE);
     }
 
@@ -82,7 +83,8 @@ int main(int argc, char *argv[]) {
     printf("Maximum number of iterations, %d, exceeded\n", itr);
 
     /* Free the memory and terminate */
-    freeMem(g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn);
+    count = 6;
+    freeMem(count, g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn);
     exit(EXIT_FAILURE);
   }
 
@@ -309,31 +311,42 @@ void l2_norm(struct FieldPointers *f, struct SimulationInfo *s, FILE *flog,
   err_u = sqrt(s->dtdxdy * err_u);
   err_v = sqrt(s->dtdxdy * err_v);
   err_p = sqrt(s->dtdxdy * err_p);
-  s->err_tot = fmaxof(err_u, err_v, err_p, err_d);
+  int count = 4;
+  s->err_tot = fmaxof(count, err_u, err_v, err_p, fabs(err_d));
 
   fprintf(flog, "%d \t %.8lf \t %.8lf \t %.8lf \t %.8lf \t %.8lf\n", itr,
-          s->err_tot, err_u, err_v, err_p, err_d);
+          s->err_tot, err_u, err_v, err_p, fabs(err_d));
 }
 
 /* Free the memory */
-void freeMem(double **phi, ...) {
+void freeMem(int count, ...) {
+  double **arr;
   va_list args;
 
-  va_start(args, phi);
-  free(*va_arg(args, double **));
-  free(va_arg(args, double **));
+  va_start(args, count);
+  for (int i = 1; i <= count; i++) {
+    arr = va_arg(args, double **);
+    free(*arr);
+    *arr = NULL;
+    free(arr);
+    arr = NULL;
+  }
   va_end(args);
 }
 
 /* Find mamximum of a set of float numebrs */
-double fmaxof(double errs, ...) {
-  double max = errs, val;
-  va_list args;
+double fmaxof(int count, ...) {
+  va_list args; 
+  double max, err;
 
-  va_start(args, errs);
-  val = va_arg(args, double);
-  max = fmax(val, max);
-  va_end(args);
+  va_start(args, count);
+  max = va_arg(args, double);
+  for (int i = 2; i <= count; i++) 
+    if ((err = va_arg(args, double)) > max) 
+        max = err; 
+
+  va_end(args); 
+  
   return max;
 }
 
@@ -358,7 +371,8 @@ void dump_data(struct Grid2D *g) {
   }
 
   /* Free the memory */
-  freeMem(g->ubufo, g->vbufo, g->pbufo, g->ubufn, g->vbufn, g->pbufn);
+  int count = 6;
+  freeMem(count, g->ubufo, g->vbufo, g->pbufo, g->ubufn, g->vbufn, g->pbufn);
 
   /* Writing all the field data */
   fd = fopen("data/xyuvp", "w+t+e");
@@ -372,5 +386,6 @@ void dump_data(struct Grid2D *g) {
   fclose(fd);
 
   /* Free the memory */
-  freeMem(ug, vg, pg);
+  count = 3;
+  freeMem(count, ug, vg, pg);
 }

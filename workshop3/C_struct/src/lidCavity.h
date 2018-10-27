@@ -87,10 +87,10 @@ void l2_norm(struct FieldPointers *f, struct SimulationInfo *s, FILE *flog,
              int itr);
 
 /* Free the memory */
-void freeMem(double **phi, ...);
+void freeMem(int count, ...);
 
 /* Find mamximum of a set of float numebrs */
-double fmaxof(double errs, ...);
+double fmaxof(int count, ...);
 
 /* Save fields data to files */
 void dump_data(struct Grid2D *g);

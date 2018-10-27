@@ -20,10 +20,10 @@ void set_UBC(double **un, double **vn, double ubc[4], double vbc[4]);
 void set_PBC(double **pn, double pbc[4], double dx, double dy);
 
 /* Free the memory */
-void freeMem(double **phi, ...);
+void freeMem(int count, ...);
 
 /* Find mamximum of a set of float numebrs */
-double fmaxof(double errs, ...);
+double fmaxof(int count, ...);
 
 /* Save fields data to files */
 void dump_data(double **u, double **v, double **p, double dx, double dy);

@@ -96,3 +96,24 @@ ax.set_xlabel('$x$ (m)')
 ax.set_ylabel('$y$ (m)')
 plt.tight_layout()
 savepgf("pressure_stream")
+plt.clf()
+
+# =========================================================================== #
+# Plot residuals
+data = np.loadtxt("data/residual", dtype=np.float)
+c = 10
+
+fig, ax = newfig(0.8)
+ax.semilogy(data[c:, 0], data[c:, 1], label="tot", linewidth=0.6)
+ax.semilogy(data[c:, 0], data[c:, 2], label="u", linewidth=0.6)
+ax.semilogy(data[c:, 0], data[c:, 3], label="v", linewidth=0.6)
+ax.semilogy(data[c:, 0], data[c:, 4], label="p", linewidth=0.6)
+ax.semilogy(data[c:, 0], data[c:, 5], label="div", linewidth=0.6)
+
+ax.tick_params(direction='out', top=False, right=False)
+ax.set_title("Residual")
+ax.set_xlabel('Time')
+ax.set_ylabel('Residual')
+plt.tight_layout()
+ax.legend(loc="best")
+savepgf("residual")
