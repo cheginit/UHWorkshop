@@ -36,6 +36,9 @@ struct FieldPointers {
 } f;
 
 struct SimulationInfo {
+  double Re;
+  double l_lid;
+
   /* Boundary conditions */
   double ubc[4];
   double vbc[4];
@@ -46,20 +49,42 @@ struct SimulationInfo {
   double nu;
   double c2;
   double cfl;
+
+  double dtdx;
+  double dtdy;
+  double dtdxx;
+  double dtdyy;
+  double dtdxdy;
+
+  double err_tot;
 } s;
 
 /* Applying boundary conditions for velocity */
-void initialize(struct FieldPointers *f, struct Grid2D *g);
+void initialize(struct FieldPointers *f, struct Grid2D *g,
+                struct SimulationInfo *s);
 
-/* Generate a 2D array using pointer to a pointer */
+/* Generate a 2D array using pointer to pointer */
 double **array_2D(int row, int col);
+
+/* Set initial condition */
+void set_init(struct FieldPointers *f, struct SimulationInfo *s);
 
 /* Update the fields to the new time step for the next iteration */
 void update(struct FieldPointers *f);
 
+/* Solve momentum for computing u and v */
+void solve_U(struct FieldPointers *f, struct SimulationInfo *s);
+
+/* Solves continuity equation for computing P */
+void solve_P(struct FieldPointers *f, struct SimulationInfo *s);
+
 /* Applying boundary conditions for velocity */
 void set_BC(struct FieldPointers *f, struct Grid2D *g,
             struct SimulationInfo *s);
+
+/* Compute L2-norm */
+void l2_norm(struct FieldPointers *f, struct SimulationInfo *s, FILE *flog,
+             int itr);
 
 /* Free the memory */
 void freeMem(double **phi, ...);
