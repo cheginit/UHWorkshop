@@ -48,6 +48,9 @@ struct SimulationInfo {
   double cfl;
 } s;
 
+/* Applying boundary conditions for velocity */
+void initialize(struct FieldPointers *f, struct Grid2D *g);
+
 /* Generate a 2D array using pointer to a pointer */
 double **array_2D(int row, int col);
 
