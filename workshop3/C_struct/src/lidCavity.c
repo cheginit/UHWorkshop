@@ -125,7 +125,7 @@ void initialize(struct FieldPointers *f, struct Grid2D *g,
   if (s->Re < 500.0) {
     s->cfl = 0.15;
     s->c2 = 5.0;
-  } else if (s->Re < 2000 - .0) {
+  } else if (s->Re < 2000.0) {
     s->cfl = 0.20;
     s->c2 = 5.8;
   } else {
@@ -180,9 +180,11 @@ void update(struct FieldPointers *f) {
   tmp = f->u;
   f->u = f->un;
   f->un = tmp;
+
   tmp = f->v;
   f->v = f->vn;
   f->vn = tmp;
+
   tmp = f->p;
   f->p = f->pn;
   f->pn = tmp;
@@ -293,9 +295,8 @@ void set_BC(struct FieldPointers *f, struct Grid2D *g,
 void l2_norm(struct FieldPointers *f, struct SimulationInfo *s, FILE *flog,
              int itr) {
   int i, j;
-  double err_u, err_v, err_p, err_d;
+  double err_u = 0.0, err_v = 0.0, err_p = 0.0, err_d = 0.0;
 
-  s->err_tot = err_u = err_v = err_p = err_d = 0.0;
 #pragma omp parallel for private(i,j) schedule(auto) \
                              reduction(+:err_u, err_v, err_p, err_d)
   for (i = 1; i < IX - 1; i++) {
@@ -311,8 +312,10 @@ void l2_norm(struct FieldPointers *f, struct SimulationInfo *s, FILE *flog,
   err_u = sqrt(s->dtdxdy * err_u);
   err_v = sqrt(s->dtdxdy * err_v);
   err_p = sqrt(s->dtdxdy * err_p);
+  err_d = fabs(err_d);
+
   int count = 4;
-  s->err_tot = fmaxof(count, err_u, err_v, err_p, fabs(err_d));
+  s->err_tot = fmaxof(count, err_u, err_v, err_p, err_d);
 
   fprintf(flog, "%d \t %.8lf \t %.8lf \t %.8lf \t %.8lf \t %.8lf\n", itr,
           s->err_tot, err_u, err_v, err_p, fabs(err_d));
@@ -337,13 +340,12 @@ void freeMem(int count, ...) {
 /* Find mamximum of a set of float numebrs */
 double fmaxof(int count, ...) {
   va_list args; 
-  double max, err;
+  double max;
 
   va_start(args, count);
   max = va_arg(args, double);
   for (int i = 2; i <= count; i++) 
-    if ((err = va_arg(args, double)) > max) 
-        max = err; 
+    max = (va_arg(args, double) > max) ? va_arg(args, double) : max;
 
   va_end(args); 
   
