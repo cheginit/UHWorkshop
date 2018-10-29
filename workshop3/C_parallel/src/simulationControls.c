@@ -11,8 +11,9 @@ void initialize(struct FieldPointers *f, struct Grid2D *g,
   }
 
   g->nx_p = g->nx_psg = (g->nx / nprocs) + g->ghosts;
-  if (LAST_NODE)
+  if (LAST_NODE){
     g->nx_psg = g->nx_p + 1;
+  }
 
   g->ubufo = array_2D(g->nx_p, g->ny + 1);
   g->ubufn = array_2D(g->nx_p, g->ny + 1);
@@ -90,14 +91,14 @@ void set_BC(struct FieldPointers *f, struct Grid2D *g, struct SimulationInfo *s,
                g->ny, MPI_DOUBLE, s->prev, tag, WORLD, &status);
 
   MPI_Sendrecv(&f->vn[g->nx_psg - 2][1], g->ny - 1, MPI_DOUBLE, s->next, tag,
-               &f->vn[g->nx_psg - 1][1], g->ny - 1, MPI_DOUBLE, s->next, tag, WORLD,
-               &status);
-  MPI_Sendrecv(&f->vn[1][1], g->ny - 1, MPI_DOUBLE, s->prev, tag, &f->vn[0][1], g->ny - 1,
-               MPI_DOUBLE, s->prev, tag, WORLD, &status);
+               &f->vn[g->nx_psg - 1][1], g->ny - 1, MPI_DOUBLE, s->next, tag,
+               WORLD, &status);
+  MPI_Sendrecv(&f->vn[1][1], g->ny - 1, MPI_DOUBLE, s->prev, tag, &f->vn[0][1],
+               g->ny - 1, MPI_DOUBLE, s->prev, tag, WORLD, &status);
 
   MPI_Sendrecv(&f->pn[g->nx_psg - 2][1], g->ny, MPI_DOUBLE, s->next, tag,
-               &f->pn[g->nx_psg - 1][1], g->ny, MPI_DOUBLE, s->next, tag,
-               WORLD, &status);
+               &f->pn[g->nx_psg - 1][1], g->ny, MPI_DOUBLE, s->next, tag, WORLD,
+               &status);
   MPI_Sendrecv(&f->pn[1][1], g->ny, MPI_DOUBLE, s->prev, tag, &f->pn[0][1],
                g->ny, MPI_DOUBLE, s->prev, tag, WORLD, &status);
 
@@ -124,16 +125,18 @@ void set_BC(struct FieldPointers *f, struct Grid2D *g, struct SimulationInfo *s,
   }
 
   /* Bottom */
-  for (i = 0; i < g->nx_p; i++)
+  for (i = 0; i < g->nx_p; i++){
     f->un[i][0] = 2.0 * s->ubc[2] - f->un[i][1];
+  }
   for (i = 0; i < g->nx_psg; i++) {
     f->vn[i][0] = s->vbc[2];
     f->pn[i][0] = f->pn[i][1] - g->dy * s->pbc[2];
   }
 
   /* Top */
-  for (i = 0; i < g->nx_p; i++)
+  for (i = 0; i < g->nx_p; i++){
     f->un[i][g->ny] = 2.0 * s->ubc[0] - f->un[i][g->ny - 1];
+  }
   for (i = 0; i < g->nx_psg; i++) {
     f->vn[i][g->ny - 1] = s->vbc[0];
     f->pn[i][g->ny] = f->pn[i][g->ny - 1] - g->dy * s->pbc[0];
@@ -201,13 +204,13 @@ void solve_P(struct FieldPointers *f, struct Grid2D *g,
 
 /* Compute L2-norm */
 void l2_norm(struct FieldPointers *f, struct Grid2D *g,
-             struct SimulationInfo *s, int itr, int rank,
-             int nprocs) {
+             struct SimulationInfo *s, int rank, int nprocs) {
   int i, j;
   double err_u = 0.0, err_v = 0.0, err_p = 0.0, err_d = 0.0;
-  
-  for (i = 0; i < 5; i++)
+
+  for (i = 0; i < 5; i++){
     s->errs[i] = 0;
+  }
 #pragma omp parallel for private(i,j) schedule(auto) \
                              reduction(+:err_u, err_v, err_p, err_d)
   for (i = 1; i < g->nx_p - 1; i++) {

@@ -17,8 +17,9 @@ void dump_data(struct Grid2D *g, struct FieldPointers *f, int rank,
 
   offset = g->ghosts / 2;
 
-  if (LAST_NODE)
+  if (LAST_NODE){
     offset = g->ghosts;
+  }
 
   /* #pragma omp parallel for private(i, j) schedule(auto) */
   for (i = 0; i < inner; i++) {
@@ -71,7 +72,7 @@ void dump_data(struct Grid2D *g, struct FieldPointers *f, int rank,
         for (j = 0; j < g->ny; j++) {
           fprintf(fd, "%.8lf \t %.8lf \t %.8lf \t %.8lf \t %.8lf\n",
                   (double)(i + inner * r + offset) * g->dx, (double)j * g->dy,
-                   ubuff[i][j], vbuff[i][j], pbuff[i][j]);
+                  ubuff[i][j], vbuff[i][j], pbuff[i][j]);
         }
       }
     }

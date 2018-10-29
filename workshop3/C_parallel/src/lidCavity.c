@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
   MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
   MPI_Comm_size(WORLD, &nprocs);
   MPI_Comm_rank(WORLD, &rank);
-  
+
   g.nx = IX;
   g.ny = IY;
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
     solve_U(&f, &g, &s);
     solve_P(&f, &g, &s);
     set_BC(&f, &g, &s, rank, nprocs);
-    l2_norm(&f, &g, &s, itr, rank, nprocs);
+    l2_norm(&f, &g, &s, rank, nprocs);
 
     if (MASTER) {
       /* Check if solution diverged */
@@ -87,8 +87,8 @@ int main(int argc, char *argv[]) {
         freeMem(count, g.ubufo, g.vbufo, g.pbufo, g.ubufn, g.vbufn, g.pbufn);
         exit(EXIT_FAILURE);
       }
-      fprintf(flog, "%d\t%.8lf\t%.8lf\t%.8lf\t%.8lf\t%.8lf\n", itr,
-              s.errs[0], s.errs[1], s.errs[2], s.errs[3], s.errs[4]);
+      fprintf(flog, "%d\t%.8lf\t%.8lf\t%.8lf\t%.8lf\t%.8lf\n", itr, s.errs[0],
+              s.errs[1], s.errs[2], s.errs[3], s.errs[4]);
       itr += 1;
     }
     MPI_Bcast(&s.errs[0], 1, MPI_DOUBLE, 0, WORLD);

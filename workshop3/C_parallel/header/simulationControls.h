@@ -35,6 +35,6 @@ void solve_P(struct FieldPointers *f, struct Grid2D *g,
 
 /* Compute L2-norm */
 void l2_norm(struct FieldPointers *f, struct Grid2D *g, struct SimulationInfo *s,
-             int itr, int rank, int nprocs);
+             int rank, int nprocs);
 
 #endif /* SIMULATIONCONTROLS_H */

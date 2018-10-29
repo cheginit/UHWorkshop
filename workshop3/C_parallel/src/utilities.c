@@ -67,9 +67,13 @@ double fmaxof(int count, ...) {
 
   va_start(args, count);
   max = va_arg(args, double);
-  for (int i = 2; i <= count; i++)
-    if ((err = va_arg(args, double)) > max)
+
+  for (int i = 2; i <= count; i++) {
+    err = va_arg(args, double);
+    if (err > max){
       max = err;
+    }
+  }
 
   va_end(args);
 
