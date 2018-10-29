@@ -1,0 +1,88 @@
+#!/bin/sh
+
+usage() {
+    cat<<USAGE
+Usage: ${0##*/} [OPTION]
+options:
+  -r|re <int>     Specify Re number (100, 1000, 5000, 10000)
+  -c|cmake        Configure (cmake) the project first then make and run
+  -h|help         print the usage
+USAGE
+}
+
+error() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    usage
+    exit 1
+}
+
+setRe() {
+re="$1"
+case $re in
+  100)   col="1";;
+  1000)  col="2";;
+  5000)  col="3";;
+  10000) col="4";;
+  *)     echo "Data is not available for Re=$re" \
+      && echo "Accceptable values are: 100, 1000, 5000, 10000" \
+      && exit 1;;
+esac
+}
+
+config=0
+
+while [ "$#" -gt 0 ]
+do
+   case "$1" in
+   -h | -help)
+      usage && exit 0
+      ;;
+   -r | -re)
+      [ "$#" -ge 2 ] || error "'$1' option requires an argument"
+      setRe "$2"
+      shift 2
+     ;;
+   -c | -cmake)
+      config=1
+      shift
+      ;;
+   --)
+      shift
+      break
+      ;;
+   -*)
+      error "invalid option '$1'"
+      ;;
+   *)
+      break
+      ;;
+   esac
+done
+
+[ -z "$re" ] && setRe 100
+
+[ ! -d build -a -z "$config" ] \
+&& error "The project is not configured, -c option should be specified"
+
+if [ "$config" -eq 1 ]; then
+  rm -rf build bin
+  mkdir build
+  cd build
+  cmake ..
+else
+  cd build
+fi
+
+make
+cd ..
+
+[ ! -d output ] && mkdir output
+
+[ ! -d data ] && mkdir data
+rm -f data/Central* data/residual output/*.pdf
+$(which time) -f "Elapsed=%E" mpirun -np 2 bin/lidCavity $re
+
+[ "$?" -eq "0" ] \
+&& echo "Plotting the results" \
+&& python3 ../../plotter/plotter.py $re $col

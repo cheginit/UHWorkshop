@@ -11,8 +11,8 @@ rc = int(argv[2])
 
 files = {
     'uvp': "data/xyuvp",
-    'ue': "../plotter/data/yu",
-    've': "../plotter/data/xv"
+    'ue': "../../plotter/data/yu",
+    've': "../../plotter/data/xv"
 }
 
 data = {k: np.loadtxt(f, dtype=np.float64) for k, f in files.items()}
