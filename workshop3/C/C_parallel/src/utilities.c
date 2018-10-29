@@ -63,16 +63,13 @@ void freeMem(int count, ...) {
 /* Find mamximum of a set of float numebrs */
 double fmaxof(int count, ...) {
   va_list args;
-  double max, err;
+  double max;
 
   va_start(args, count);
   max = va_arg(args, double);
 
   for (int i = 2; i <= count; i++) {
-    err = va_arg(args, double);
-    if (err > max){
-      max = err;
-    }
+    max = fmax(va_arg(args, double), max);
   }
 
   va_end(args);
