@@ -6,6 +6,7 @@ Usage: ${0##*/} [OPTION]
 options:
   -r|re <int>     Specify Re number (100, 1000, 5000, 10000)
   -c|cmake        Configure (cmake) the project first then make and run
+  -n|np <int>     Number of cores for mpirun
   -h|help         print the usage
 USAGE
 }
@@ -40,7 +41,12 @@ do
       ;;
    -r | -re)
       [ "$#" -ge 2 ] || error "'$1' option requires an argument"
-      setRe "$2"
+      shift 2
+     ;;
+   -n | -np)
+      [ "$#" -ge 2 ] || error "'$1' option requires an argument"
+      [ "$2" -ge 0 ] && ncore=$2 \
+      || error "Only integer values are acceptable for option -n"
       shift 2
      ;;
    -c | -cmake)
@@ -78,10 +84,11 @@ make
 cd ..
 
 [ ! -d output ] && mkdir output
-
 [ ! -d data ] && mkdir data
+[ -z $ncore ] && ncore=2
+
 rm -f data/Central* data/residual output/*.pdf
-$(which time) -f "Elapsed=%E" mpirun -np 2 bin/lidCavity $re
+$(which time) -f "Elapsed=%E" mpirun -np $ncore bin/lidCavity $re
 
 [ "$?" -eq "0" ] \
 && echo "Plotting the results" \
