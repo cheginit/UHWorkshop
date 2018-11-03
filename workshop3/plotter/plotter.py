@@ -5,71 +5,69 @@ from matplotlib import cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sys import argv
 
-# Read fields data
+
 re = argv[1]
-rc = int(argv[2])
-
-files = {
-    'uvp': "data/xyuvp",
-    'ue': "../../plotter/data/yu",
-    've': "../../plotter/data/xv"
-}
-
-data = {k: np.loadtxt(f, dtype=np.float64) for k, f in files.items()}
 
 # =========================================================================== #
-# Plot velocity at the middle of the domain along the x and y axes
-x = np.unique(data['uvp'][:, 0])
-y = np.unique(data['uvp'][:, 1])
-u, v, p = [data['uvp'][:, i].reshape(np.shape(x)[0], -1).T for i in [2, 3, 4]]
-um = u[:, int(u.shape[1] / 2)]
-vm = v[int(v.shape[0] / 2), :]
+uvp = np.loadtxt("data/xyuvp", dtype=np.float64)
+x = np.unique(uvp[:, 0])
+y = np.unique(uvp[:, 1])
+u, v, p = [uvp[:, i].reshape(np.shape(x)[0], -1).T for i in [2, 3, 4]]
 
-fig, ax_u = newfig(0.8)
-ax_v = ax_u.twinx()
-ax_v2 = ax_v.twiny()
+# Plot velocity at the middle of the domain along the x and y axes for lidCavity
+if len(argv) > 2:
+    rc = int(argv[2])
+    um = u[:, int(u.shape[1] / 2)]
+    vm = v[int(v.shape[0] / 2), :]
 
-ax_u.plot(um, y, color='g', label="Numerical, $U_x$", linewidth=0.6)
-ax_u.plot(
-    data['ue'][:, rc],
-    data['ue'][:, 0],
-    '*',
-    color='r',
-    label="Ghia, $U_x$",
-    linewidth=0.6)
+    ue = np.loadtxt("../../plotter/data/yu", dtype=np.float64)
+    ve = np.loadtxt("../../plotter/data/xv", dtype=np.float64)
 
-ax_v2.plot(x, vm, label="Numerical, $U_y$", linewidth=0.6)
-ax_v2.plot(
-    data['ve'][:, 0],
-    data['ve'][:, rc],
-    'x',
-    label="Ghia, $U_y$",
-    linewidth=0.6)
+    fig, ax_u = newfig(0.8)
+    ax_v = ax_u.twinx()
+    ax_v2 = ax_v.twiny()
 
-ax_u.set_xlim([-1, 1])
-ax_u.set_ylim([0, 1])
-ax_v.set_ylim([-1, 1])
-ax_v2.set_xlim([0, 1])
+    ax_u.plot(um, y, color='g', label="Numerical, $U_x$", linewidth=0.6)
+    ax_u.plot(
+        ue[:, rc],
+        ue[:, 0],
+        '*',
+        color='r',
+        label="Ghia, $U_x$",
+        linewidth=0.6)
 
-ax_u.grid(alpha=0.5)
-ax_u.tick_params(direction='out', top=False, right=False)
-ax_u.set_title("Velocity profile along the middle of axes for Re=" + re)
+    ax_v2.plot(x, vm, label="Numerical, $U_y$", linewidth=0.6)
+    ax_v2.plot(
+        ve[:, 0],
+        ve[:, rc],
+        'x',
+        label="Ghia, $U_y$",
+        linewidth=0.6)
 
-ax_u.set_ylabel('$y$ (m)')
-ax_v2.set_xlabel('$x$ (m)')
-ax_u.set_xlabel('$U_y$ (m.s$^{-1}$)')
-ax_v.set_ylabel('$U_x$ (m.s$^{-1}$)')
+    ax_u.set_xlim([-1, 1])
+    ax_u.set_ylim([0, 1])
+    ax_v.set_ylim([-1, 1])
+    ax_v2.set_xlim([0, 1])
 
-ax_u.legend(loc='center left', bbox_to_anchor=(1.25, 0.1))
-ax_v2.legend(loc='center left', bbox_to_anchor=(1.25, 0.27))
+    ax_u.grid(alpha=0.5)
+    ax_u.tick_params(direction='out', top=False, right=False)
+    ax_u.set_title("Velocity profile along the middle of axes for Re=" + re)
 
-ax_u.set_aspect('auto')
-ax_v.set_aspect('auto')
+    ax_u.set_ylabel('$y$ (m)')
+    ax_v2.set_xlabel('$x$ (m)')
+    ax_u.set_xlabel('$U_y$ (m.s$^{-1}$)')
+    ax_v.set_ylabel('$U_x$ (m.s$^{-1}$)')
 
-plt.tight_layout()
-savepgf("velocity")
+    ax_u.legend(loc='center left', bbox_to_anchor=(1.25, 0.1))
+    ax_v2.legend(loc='center left', bbox_to_anchor=(1.25, 0.27))
 
-plt.clf()
+    ax_u.set_aspect('auto')
+    ax_v.set_aspect('auto')
+
+    plt.tight_layout()
+    savepgf("velocity")
+
+    plt.clf()
 
 # =========================================================================== #
 # Extract fields data from input including X, Y, u, v and p

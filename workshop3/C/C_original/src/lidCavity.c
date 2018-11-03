@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 
   /* Compute flow parameters based on inputs */
   dx = l_lid / (double)(IX - 1);
-  dy = dx; // l_lid / (double) (IY - 1);
+  dy = l_lid / (double) (IY - 1);
   dt = cfl * fmin(dx, dy) / ut;
   nu = ut * l_lid / Re;
 
@@ -152,37 +152,6 @@ int main(int argc, char *argv[]) {
     u[i][ytot - 2] = ut;
   }
 
-  /* Apply boundary conditions */
-  /* Dirichlet boundary condition */
-  for (i = xlo; i < xhi; i++) {
-    u[i][0] = 2.0 * ub - u[i][1];
-    u[i][ytot - 1] = 2.0 * ut - u[i][ytot - 2];
-  }
-  for (j = 0; j < ytot; j++) {
-    u[0][j] = ul;
-    u[xhi][j] = ur;
-  }
-
-  /* Dirichlet boundary condition */
-  for (i = xlo; i < xtot - 1; i++) {
-    v[i][0] = vb;
-    v[i][yhi] = vt;
-  }
-  for (j = 0; j < IY; j++) {
-    v[0][j] = 2.0 * vl - v[1][j];
-    v[xtot - 1][j] = 2.0 * vr - v[xtot - 2][j];
-  }
-
-  /* Neumann boundary condition */
-  for (i = xlo; i < xtot - 1; i++) {
-    p[i][0] = p[i][1] - dy * gradp;
-    p[i][ytot - 1] = p[i][ytot - 2] - dy * gradp;
-  }
-  for (j = 0; j < ytot; j++) {
-    p[0][j] = p[1][j] - dx * gradp;
-    p[xtot - 1][j] = p[xtot - 2][j] - dx * gradp;
-  }
-
   /* Start the main loop */
   do {
     phi_gc(u, uc, ug, ru);
@@ -217,23 +186,23 @@ int main(int argc, char *argv[]) {
     }
 
     /* Dirichlet boundary condition */
-    for (i = xlo; i < xhi; i++) {
-      u[i][0] = 2.0 * ub - u[i][1];
-      u[i][ytot - 1] = 2.0 * ut - u[i][ytot - 2];
+    for (i = 0; i < IX; i++) {
+      un[i][0] = 2.0 * ub - un[i][1];
+      un[i][ytot - 1] = 2.0 * ut - un[i][ytot - 2];
     }
     for (j = 0; j < ytot; j++) {
-      u[0][j] = ul;
-      u[xhi][j] = ur;
+      un[0][j] = ul;
+      un[xhi][j] = ur;
     }
 
     /* Dirichlet boundary condition */
-    for (i = xlo; i < xtot - 1; i++) {
-      v[i][0] = vb;
-      v[i][yhi] = vt;
+    for (i = 0; i < xtot; i++) {
+      vn[i][0] = vb;
+      vn[i][yhi] = vt;
     }
     for (j = 0; j < IY; j++) {
-      v[0][j] = 2.0 * vl - v[1][j];
-      v[xtot - 1][j] = 2.0 * vr - v[xtot - 2][j];
+      vn[0][j] = 2.0 * vl - vn[1][j];
+      vn[xtot - 1][j] = 2.0 * vr - vn[xtot - 2][j];
     }
 
 /* Solves continuity equation for computing P */
@@ -246,13 +215,13 @@ int main(int argc, char *argv[]) {
     }
 
     /* Neumann boundary condition */
-    for (i = xlo; i < xtot - 1; i++) {
-      p[i][0] = p[i][1] - dy * gradp;
-      p[i][ytot - 1] = p[i][ytot - 2] - dy * gradp;
+    for (i = 0; i < xtot; i++) {
+      pn[i][0] = pn[i][1] - dy * gradp;
+      pn[i][ytot - 1] = pn[i][ytot - 2] - dy * gradp;
     }
     for (j = 0; j < ytot; j++) {
-      p[0][j] = p[1][j] - dx * gradp;
-      p[xtot - 1][j] = p[xtot - 2][j] - dx * gradp;
+      pn[0][j] = pn[1][j] - dx * gradp;
+      pn[xtot - 1][j] = pn[xtot - 2][j] - dx * gradp;
     }
 
     /* Compute L2-norm */
@@ -355,6 +324,7 @@ int main(int argc, char *argv[]) {
     free(*pbufn);
     free(pbufn);
 
+    fclose(flog);
     exit(EXIT_FAILURE);
   }
 
