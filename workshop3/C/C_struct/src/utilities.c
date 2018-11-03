@@ -73,3 +73,18 @@ double fmaxof(int count, ...) {
   va_end(args);
   return max;
 }
+
+/* Find mamximum of an array */
+double fmaxarr(double **arr, int xmax, int ymax) {
+  double max = arr[0][0];
+  int i, j;
+
+#pragma omp parallel for private(i, j) schedule(auto) reduction(max: max)
+  for (i = 0; i < xmax; i++) {
+    for (j = 0; j < ymax; j++) {
+      max = fmax(max, arr[i][j]);
+    }
+  }
+
+  return max;
+}

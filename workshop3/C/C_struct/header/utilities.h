@@ -20,4 +20,7 @@ void freeMem(int count, ...);
 /* Find mamximum of a set of float numebrs */
 double fmaxof(int count, ...);
 
+/* Find mamximum of an array */
+double fmaxarr(double **arr, int xmax, int ymax);
+
 #endif /* UTILITITES_H */

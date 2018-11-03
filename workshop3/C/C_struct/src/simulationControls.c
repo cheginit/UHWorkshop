@@ -34,7 +34,16 @@ void initialize(struct FieldPointers *f, struct Grid2D *g,
   }
 
   s->nu = s->ubc[0] * s->l_lid / s->Re;
-  s->dt = s->cfl * fmin(g->dx, g->dy) / s->ubc[0];
+}
+
+/* Compute the time step based on maximum velocity in the domain  */
+void set_delt(struct FieldPointers *f, struct Grid2D *g,
+              struct SimulationInfo *s) {
+  double umax;
+
+  umax = fmax(fmaxarr(f->u, g->nx, g->ny + 1),
+              fmaxarr(f->v, g->nx + 1, g->ny));
+  s->dt = s->cfl * fmin(g->dx, g->dy) / umax;
 
   /* Carry out operations that their values do not change in loops */
   s->dtdx = s->dt / g->dx;

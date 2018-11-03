@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
 
   initialize(&f, &g, &s);
   set_init(&f, &g, &s);
+  set_delt(&f, &g, &s);
 
   /* Start the main loop */
   do {

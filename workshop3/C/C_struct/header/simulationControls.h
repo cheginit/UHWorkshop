@@ -17,6 +17,10 @@ void initialize(struct FieldPointers *f, struct Grid2D *g,
 void set_init(struct FieldPointers *f, struct Grid2D *g,
               struct SimulationInfo *s);
 
+/* Compute the time step based on maximum velocity in the domain  */
+void set_delt(struct FieldPointers *f, struct Grid2D *g,
+              struct SimulationInfo *s);
+
 /* Applying boundary conditions for velocity */
 void set_UBC(struct FieldPointers *f, struct Grid2D *g,
             struct SimulationInfo *s);
